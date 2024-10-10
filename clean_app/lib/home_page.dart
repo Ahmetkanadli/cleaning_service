@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               // Main Lottie Animation
               Lottie.asset(
-                'assets/animations/animation.json',
+                'assets/animations/clean_animation_orange.json',
                 width: 300.w,
                 repeat: true,
               ),
