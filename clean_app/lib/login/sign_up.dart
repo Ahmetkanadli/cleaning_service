@@ -1,4 +1,5 @@
 
+import 'package:clean_app/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -203,19 +204,15 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 25),
                 ElevatedButton(
                   onPressed: hasEightCharacters && hasNumber && hasLetter
-                      ? () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const CongratulationPage(),
-                              ));
-                        }
+                      ? () async {
+                    AuthService().signup(email: _emailController.text,
+                        password: _passwordController.text, context: context);
+                  }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 84, 64, 140),
                     disabledBackgroundColor:
-                        const Color.fromARGB(255, 84, 64, 140),
+                    const Color.fromARGB(255, 84, 64, 140),
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(48),
@@ -328,7 +325,7 @@ class PasswordRequirementItem extends StatelessWidget {
         Icon(
           isValid ? Icons.check : Icons.close,
           color:
-              isValid ? const Color.fromARGB(255, 162, 140, 224) : Colors.red,
+          isValid ? const Color.fromARGB(255, 162, 140, 224) : Colors.red,
           size: 18,
         ),
         const SizedBox(width: 12),
@@ -337,7 +334,7 @@ class PasswordRequirementItem extends StatelessWidget {
           style: GoogleFonts.roboto(
             fontSize: 14,
             color:
-                const Color.fromARGB(255, 166, 166, 166), // Sabit metin rengi
+            const Color.fromARGB(255, 166, 166, 166), // Sabit metin rengi
             fontWeight: FontWeight.w400,
           ),
         ),
@@ -371,12 +368,14 @@ class CongratulationPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 5),
-            Text(
-              "Hesabınız hazır. Rüyalarınızı anlamlandırma zamanı.",
-              style: GoogleFonts.roboto(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFFA6A6A6),
+            Center(
+              child: Text(
+                "Hesabınız hazır. Rüyalarınızı anlamlandırma zamanı.",
+                style: GoogleFonts.roboto(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFFA6A6A6),
+                ),
               ),
             ),
             const SizedBox(
@@ -384,11 +383,12 @@ class CongratulationPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ));
+                // Push and remove until the login page
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                      (Route<dynamic> route) => false,
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 84, 64, 140),

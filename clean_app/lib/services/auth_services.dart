@@ -1,5 +1,6 @@
+
 import 'package:clean_app/home_page.dart';
-import 'package:clean_app/login/login_page.dart';
+import 'package:clean_app/login/sign_up.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -13,17 +14,19 @@ class AuthService {
     String errorMessage = '';
 
     try {
-
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       if (credential != null) {
         await credential.user?.sendEmailVerification();
-        _showErrorDialog(context, "Bilgi",
-            "Kayıt başarılı, doğrulama e-postası gönderildi.");
+        _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => const CongratulationPage()),
+          );
+        });
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -36,20 +39,14 @@ class AuthService {
         errorMessage = "Kayıt sırasında bir hata oluştu: ${e.message}";
       }
     } catch (e) {
+      print("hata : ${e.toString()}");
       errorMessage = "Bilinmeyen bir hata oluştu.";
     }
 
     if (errorMessage != '') {
-      print("error message1 ${errorMessage}");
-      _showErrorDialog(context, "Hata", errorMessage);
-      return;
-    } else {
-      print("error message2 ${errorMessage}");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) => const LoginPage()),
-      );
+      _showErrorDialog(context, "Hata", errorMessage, () {
+        Navigator.of(context).pop();
+      });
     }
   }
 
@@ -59,8 +56,7 @@ class AuthService {
     required BuildContext context,
   }) async {
     try {
-      UserCredential _user =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential _user = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -69,13 +65,13 @@ class AuthService {
         if (_user.user!.emailVerified) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => const HomePage()),
+            MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
           );
         } else {
           await _user.user!.sendEmailVerification();
-          _showErrorDialog(context, "Bilgi",
-              'E-posta doğrulaması gerekiyor. Lütfen e-postanızı kontrol edin.');
+          _showErrorDialog(context, "Bilgi", 'E-posta doğrulaması gerekiyor. Lütfen e-postanızı kontrol edin.', () {
+            Navigator.of(context).pop();
+          });
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -87,9 +83,13 @@ class AuthService {
       } else {
         message = 'Giriş sırasında bir hata oluştu.';
       }
-      _showErrorDialog(context, "Hata", message);
+      _showErrorDialog(context, "Hata", message, () {
+        Navigator.of(context).pop();
+      });
     } catch (e) {
-      _showErrorDialog(context, "Hata", 'Bilinmeyen bir hata oluştu.');
+      _showErrorDialog(context, "Hata", 'Bilinmeyen bir hata oluştu.', () {
+        Navigator.of(context).pop();
+      });
     }
   }
 
@@ -97,7 +97,9 @@ class AuthService {
     try {
       final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
       if (gUser == null) {
-        _showErrorDialog(context, "Hata", 'Google ile giriş iptal edildi.');
+        _showErrorDialog(context, "Hata", 'Google ile giriş iptal edildi.', () {
+          Navigator.of(context).pop();
+        });
         return;
       }
 
@@ -109,16 +111,18 @@ class AuthService {
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
-      _showErrorDialog(
-          context, "Hata", 'Google ile giriş sırasında bir hata oluştu.');
+      _showErrorDialog(context, "Hata", 'Google ile giriş sırasında bir hata oluştu.', () {
+        Navigator.of(context).pop();
+      });
     }
   }
 
   Future<void> sendPasswordResetLink(String email, BuildContext context) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      _showErrorDialog(context, "Bilgi",
-          'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.');
+      _showErrorDialog(context, "Bilgi", 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.', () {
+        Navigator.of(context).pop();
+      });
     } on FirebaseAuthException catch (e) {
       String message = '';
       if (e.code == 'user-not-found') {
@@ -126,13 +130,17 @@ class AuthService {
       } else {
         message = 'Şifre sıfırlama sırasında bir hata oluştu.';
       }
-      _showErrorDialog(context, "Hata", message);
+      _showErrorDialog(context, "Hata", message, () {
+        Navigator.of(context).pop();
+      });
     } catch (e) {
-      _showErrorDialog(context, "Hata", 'Bilinmeyen bir hata oluştu.');
+      _showErrorDialog(context, "Hata", 'Bilinmeyen bir hata oluştu.', () {
+        Navigator.of(context).pop();
+      });
     }
   }
 
-  void _showErrorDialog(BuildContext context, String title, String message) {
+  void _showErrorDialog(BuildContext context, String title, String message, Function onPressed) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -142,9 +150,7 @@ class AuthService {
           actions: <Widget>[
             TextButton(
               child: const Text('Tamam'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => onPressed(),
             ),
           ],
         );

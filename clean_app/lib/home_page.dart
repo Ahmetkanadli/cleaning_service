@@ -102,9 +102,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             SizedBox(height: 10.h),
                             Text(
                               "Ev Temizliği",
-                              style: GoogleFonts.openSans(
-                                  fontSize: 18.sp,
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
                                   color: Colors.black,
+                                fontWeight: FontWeight.w400
 
                               ),
                               textAlign: TextAlign.center,

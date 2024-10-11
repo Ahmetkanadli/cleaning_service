@@ -1,3 +1,4 @@
+import 'package:clean_app/home_page.dart';
 import 'package:clean_app/login/reset_password.dart';
 import 'package:clean_app/login/sign_up.dart';
 import 'package:flutter/material.dart';
@@ -170,7 +171,10 @@ class _LoginPageState extends State<LoginPage> {
                                 )))),
                     const SizedBox(height: 15),
                     ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => const HomePage()));
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(255, 84, 64, 140),
                           minimumSize: const Size(double.infinity, 50),

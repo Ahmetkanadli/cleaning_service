@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "14743661948",
+    "project_id": "pestvettemizlikcibul",
+    "storage_bucket": "pestvettemizlikcibul.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14743661948:android:c6fe197e433e887b78c8f9",
+        "android_client_info": {
+          "package_name": "com.sabosoftware.clean_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMXlZOgSZ4kq6IGuUXVSvoi50OKDZqL5M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
