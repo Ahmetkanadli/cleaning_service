@@ -205,8 +205,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 ElevatedButton(
                   onPressed: hasEightCharacters && hasNumber && hasLetter
                       ? () async {
-                    AuthService().signup(email: _emailController.text,
-                        password: _passwordController.text, context: context);
+                    AuthService().signup(
+                        name: _nameController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                        context: context);
                   }
                       : null,
                   style: ElevatedButton.styleFrom(

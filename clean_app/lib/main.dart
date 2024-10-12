@@ -1,10 +1,9 @@
 import 'package:clean_app/firebase_options.dart';
-import 'package:clean_app/home_page.dart';
-import 'package:clean_app/splash_screen.dart';
+import 'package:clean_app/view/adminView/admin_view.dart';
+import 'package:clean_app/view/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +29,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             appBarTheme: const AppBarTheme(
+              scrolledUnderElevation: 0,
               backgroundColor: Colors.white,
               // Set AppBar background color to white
               foregroundColor: Colors.black, // Set AppBar text color to black
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor:
                 Colors.white, // Set Scaffold background color to white
           ),
-          home: const SplashScreen(),
+          home: const AdminView(),
         );
       },
     );

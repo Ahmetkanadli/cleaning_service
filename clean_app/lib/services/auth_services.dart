@@ -1,12 +1,17 @@
 
-import 'package:clean_app/home_page.dart';
-import 'package:clean_app/login/sign_up.dart';
+import 'package:clean_app/view/login/sign_up.dart';
+import 'package:clean_app/view/userView/home/home_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<void> signup({
+    required String name,
     required String email,
     required String password,
     required BuildContext context,
@@ -21,6 +26,14 @@ class AuthService {
 
       if (credential != null) {
         await credential.user?.sendEmailVerification();
+
+        // Firestore'a kullanıcı belgesi ekleme
+        await _firestore.collection('users').doc(credential.user?.uid).set({
+          'name': name,
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
         _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
           Navigator.pushReplacement(
             context,
@@ -62,7 +75,7 @@ class AuthService {
       );
 
       if (_user.user!.uid.isNotEmpty) {
-        if (_user.user!.emailVerified) {
+        if (_user.user!.emailVerified == true) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
@@ -80,9 +93,14 @@ class AuthService {
         message = 'Kullanıcı bulunamadı.';
       } else if (e.code == 'wrong-password') {
         message = 'Yanlış şifre.';
+      }else if(e.code == 'invalid-email'){
+        message = 'Geçersiz e-posta adresi.';
+      }else if(e.code == 'invalid-credential'){
+        message = 'e-posta adresi veya şifre hatalı.';
       } else {
         message = 'Giriş sırasında bir hata oluştu.';
       }
+      print("hata : ${e.code}");
       _showErrorDialog(context, "Hata", message, () {
         Navigator.of(context).pop();
       });
@@ -139,6 +157,7 @@ class AuthService {
       });
     }
   }
+
 
   void _showErrorDialog(BuildContext context, String title, String message, Function onPressed) {
     showDialog(

@@ -1,5 +1,11 @@
+// lib/popup.dart
+import 'package:clean_app/models/service_model.dart';
+import 'package:clean_app/services/auth_services.dart';
+import 'package:clean_app/services/database_operations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MultiPagePopup extends StatefulWidget {
   const MultiPagePopup({super.key, required this.pageName});
@@ -28,10 +34,30 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
     "İzmit", "Derince", "Körfez", "Gebze", "Gölcük", "Karamürsel", "Kandıra", "Başiskele", "Kartepe", "Çayırova", "Darıca", "Dilovası"
   ];
 
+  String? getCurrentUserId() {
+    return FirebaseAuth.instance.currentUser?.uid;
+  }
+
+  final TextStyle _textStyle =GoogleFonts.inter(
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w400
+  );
+
+  final TextStyle _headerTextStyle = GoogleFonts.inter(
+      fontSize: 18.sp,
+      color: Colors.black,
+      fontWeight: FontWeight.w700
+  );
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      elevation: 100,
       child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         width: double.infinity,
         height: _pageController.hasClients && _pageController.page == 2 ? 450.h : 400.h,
         padding: const EdgeInsets.all(16.0),
@@ -39,7 +65,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture
           children: [
-            _buildPage(widget.pageName == "Ev Temizliği" ?_buildFirstPage() : _buildFirstPageOfis()),
+            _buildPage(widget.pageName == "Ev Temizliği" ? _buildFirstPage() : _buildFirstPageOfis()),
             _buildPage(_buildSecondPage()),
             _buildPage(_buildThirdPage()),
             _buildPage(_buildFourthPage()),
@@ -74,23 +100,22 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           right: 8,
           child: Text(
             "Min. Ücret: $_minimumFee TL",
-            style: const TextStyle(fontSize: 18),
+            style: _textStyle,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 40.0),
+          padding: EdgeInsets.only(top: 10.h),
           child: content,
         ),
       ],
     );
   }
 
-
   Widget _buildFirstPageOfis() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Ofis Kaç m²", style: TextStyle(fontSize: 20)),
+        Text("Ofis Kaç m²", style: _headerTextStyle),
         const SizedBox(height: 20),
         _buildOptionButton("50 m²", 0, _selectedRoomIndex, (index) {
           setState(() {
@@ -116,8 +141,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             _minimumFee = 1700;
           });
         }),
-        const Spacer(),
+        SizedBox(height: 10.h),
         ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+          ),
           onPressed: () {
             if (_selectedRoomIndex != -1) {
               _pageController.nextPage(
@@ -126,7 +154,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               );
             }
           },
-          child: const Text("Devam"),
+          child: Text("Devam", style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+          ) ,),
         ),
       ],
     );
@@ -136,7 +168,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Evin Oda sayısı kaç", style: TextStyle(fontSize: 20)),
+        Text("Evin Oda sayısı kaç", style: _headerTextStyle),
         const SizedBox(height: 20),
         _buildOptionButton("1+0", 0, _selectedRoomIndex, (index) {
           setState(() {
@@ -162,8 +194,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             _minimumFee = 1700;
           });
         }),
-        const Spacer(),
+        SizedBox(height: 10.h),
         ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+          ),
           onPressed: () {
             if (_selectedRoomIndex != -1) {
               _pageController.nextPage(
@@ -172,7 +207,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               );
             }
           },
-          child: const Text("Devam"),
+          child: Text("Devam", style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
+          )),
         ),
       ],
     );
@@ -182,7 +221,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Kaç saat temizlik yapılacak", style: TextStyle(fontSize: 20)),
+        Text("Kaç saat temizlik yapılacak", style: _headerTextStyle),
         const SizedBox(height: 20),
         _buildOptionButton("3 saat", 0, _selectedCleaningIndex, (index) {
           setState(() {
@@ -208,8 +247,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             _minimumFee = (_selectedRoomIndex == 0 ? 800 : 1700) + 800;
           });
         }),
-        const Spacer(),
+        SizedBox(height: 10.h),
         ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+          ),
           onPressed: () {
             if (_selectedCleaningIndex != -1) {
               _pageController.nextPage(
@@ -218,7 +260,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               );
             }
           },
-          child: const Text("Devam"),
+          child: Text("Devam",style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
+          )),
         ),
       ],
     );
@@ -231,7 +277,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Şehir seçiniz", style: TextStyle(fontSize: 20)),
+            Text("Şehir seçiniz", style: _headerTextStyle),
             const SizedBox(height: 20),
             _buildOptionButton("İstanbul", 0, _selectedCity == "İstanbul" ? 0 : -1, (index) {
               setState(() {
@@ -282,15 +328,20 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               decoration: const InputDecoration(
                 labelText: "Telefon",
                 border: OutlineInputBorder(),
+
               ),
+              keyboardType: TextInputType.phone,
               onChanged: (value) {
                 setState(() {
                   _phoneNumber = value;
                 });
               },
             ),
-            const Spacer(),
+            SizedBox(height: 10.h),
             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+              ),
               onPressed: () {
                 if (_selectedCity != null && _selectedDistrict != null && _address.isNotEmpty && _phoneNumber.isNotEmpty) {
                   _pageController.nextPage(
@@ -299,7 +350,11 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                   );
                 }
               },
-              child: const Text("Devam"),
+              child: Text("Devam",style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              )),
             ),
           ],
         ),
@@ -313,7 +368,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(height: 50.h),
-          const Text("Seçtiğiniz Bilgiler", style: TextStyle(fontSize: 20)),
+          Text("Seçtiğiniz Bilgiler", style: _headerTextStyle),
           const SizedBox(height: 20),
           Text("Şehir: $_selectedCity", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
@@ -323,20 +378,49 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           const SizedBox(height: 10),
           Text("Telefon: $_phoneNumber", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
+          widget.pageName == "Ev Temizliği"
+              ? Text("Oda Sayısı: ${_selectedRoomIndex + 1}", style: const TextStyle(fontSize: 18))
+              : Text("Temizlenecek Alan: ${_selectedRoomIndex == 0 ? '50 m²' : _selectedRoomIndex == 1 ? '100 m²' : _selectedRoomIndex == 2 ? '150 m²' : '150 m² üstü'}", style: const TextStyle(fontSize: 18)),
+          const SizedBox(height: 10),
           Text("Min. Ödeme Tutarı: $_minimumFee TL", style: const TextStyle(fontSize: 18)),
-          const Spacer(),
+          SizedBox(height: 10.h),
           ElevatedButton(
-            onPressed: () {
-              // Navigate to the payment page
-              Navigator.of(context).pop();
-              // Add your payment page navigation logic here
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+            ),
+            onPressed: () async {
+              String? userId = getCurrentUserId();
+              if (userId != null) {
+                // Add the service to past services
+                ServiceModel service = ServiceModel(
+                  city: _selectedCity!,
+                  district: _selectedDistrict!,
+                  address: _address,
+                  phone: _phoneNumber,
+                  fee: _minimumFee,
+                  timestamp: DateTime.now(),
+                  cleaningPlace: widget.pageName,
+                  numberOfRoomsOrArea: widget.pageName == "Ev Temizliği" ? "${_selectedRoomIndex + 1}" : _selectedRoomIndex == 0 ? '50 m²' : _selectedRoomIndex == 1 ? '100 m²' : _selectedRoomIndex == 2 ? '150 m²' : '150 m² üstü',
+                  cleaningTime: _selectedCleaningIndex + 3,
+                  status: 'not_done',
+                );
+                await DataBaseOperations().addPastService(userId: userId, service: service);
+
+                // Navigate to the payment page
+                Navigator.of(context).pop();
+              }
             },
-            child: const Text("Ödeme Sayfasına Git"),
+            child: Text("Ödeme Sayfasına Git",style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            )),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildOptionButton(String text, int index, int selectedIndex, Function(int) onTap) {
     return Padding(
@@ -347,16 +431,17 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           width: double.infinity,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: selectedIndex == index ? Colors.green : Colors.grey.shade300,
+            color: selectedIndex == index ? const Color(0xFFD1461E).withOpacity(0.9) : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
             text,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selectedIndex == index ? Colors.white : Colors.black,
-              fontSize: 18,
-            ),
+            style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                color: selectedIndex == index ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w400
+            )
           ),
         ),
       ),

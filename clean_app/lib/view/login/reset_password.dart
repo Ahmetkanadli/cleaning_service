@@ -1,5 +1,5 @@
 
-import 'package:clean_app/login/verification.dart';
+import 'package:clean_app/view/login/verification.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

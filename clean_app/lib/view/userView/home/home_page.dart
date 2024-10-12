@@ -1,8 +1,12 @@
+
+import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/view/userView/pastServices/past_services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'popup.dart'; // Import the updated widget
+import 'widget/popup.dart'; // Import the updated widget
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _controller;
   late AnimationController _homeAnimationController;
+  late Future<String> userName;
 
   @override
   void initState() {
@@ -28,6 +33,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     _controller.forward();
     _homeAnimationController.forward();
+    userName = DataBaseOperations().getUserName();
   }
 
   @override
@@ -36,44 +42,82 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  final String pageName_1 = "Ev Temizliği"; // Add this line
-  final String pageName_2 = "Ofis Temizliği"; // Add this line
+  final String pageName_1 = "Ev Temizliği";
+  final String pageName_2 = "Ofis Temizliği";
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil
-
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text("Hizmet Seçin", style: TextStyle(fontSize: 20.sp)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10.r),
+          ),
+        ),
+        backgroundColor: const Color(0xFFD1461E).withOpacity(0.9),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: SizedBox(
+                width: 50.w,
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey.shade300,
+                  child: Icon(
+                    CupertinoIcons.person,
+                    size: 30.w,
+
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 20.w),
+            FutureBuilder<String>(
+              future: userName,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error');
+                } else {
+                  return Text(
+                    snapshot.data ?? '',
+                    style: GoogleFonts.inter(
+                      fontSize: 22.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.w),
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
-              // Main Lottie Animation
               Lottie.asset(
                 'assets/animations/clean_animation_orange.json',
                 width: 300.w,
                 repeat: true,
               ),
               SizedBox(height: 70.h),
-              // Horizontal Containers
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // First Container
                   GestureDetector(
-                    key:  Key(pageName_1),
+                    key: Key(pageName_1),
                     onTap: () {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return  MultiPagePopup(pageName: pageName_1,);
+                          return MultiPagePopup(pageName: pageName_1);
                         },
                       );
                     },
@@ -84,10 +128,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       child: Container(
                         width: 150.w,
-                        height: 250.h,
+                        height: 200.h,
                         decoration: BoxDecoration(
                           color: Colors.white,
-
                           borderRadius: BorderRadius.circular(15.r),
                         ),
                         child: Column(
@@ -103,10 +146,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Text(
                               "Ev Temizliği",
                               style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  color: Colors.black,
-                                fontWeight: FontWeight.w400
-
+                                fontSize: 18.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -115,14 +157,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  // Second Container
                   GestureDetector(
-                    key:  Key(pageName_2),
+                    key: Key(pageName_2),
                     onTap: () {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return  MultiPagePopup(pageName: pageName_2,);
+                          return MultiPagePopup(pageName: pageName_2);
                         },
                       );
                     },
@@ -133,7 +174,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       child: Container(
                         width: 150.w,
-                        height: 250.h,
+                        height: 200.h,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15.r),
@@ -145,14 +186,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               'assets/animations/office_animation.json',
                               height: 150.h,
                               width: 140.w,
-                              repeat: true
+                              repeat: true,
                             ),
                             SizedBox(height: 10.h),
                             Text(
                               "Ofis Temizliği",
-                              style: GoogleFonts.openSans(
-                                  fontSize: 18.sp,
-                                  color: Colors.black,
+                              style: GoogleFonts.inter(
+                                fontSize: 18.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -165,13 +207,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               SizedBox(height: 10.h),
               GestureDetector(
-                key:  Key(pageName_1),
+                key: Key(pageName_1),
                 onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return  MultiPagePopup(pageName: pageName_1,);
-                    },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PastServices()),
                   );
                 },
                 child: Card(
@@ -181,7 +221,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   child: Container(
                     width: 310.w,
-                    height: 150.h,
+                    height: 100.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15.r),
@@ -193,22 +233,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           'assets/animations/clock_animation.json',
                           height: 100.h,
                           width: 100.w,
-                          repeat: true
+                          repeat: true,
                         ),
-                        SizedBox(height: 10.h),
+                        SizedBox(height: 10.w),
                         Text(
                           "Geçmiş Hizmetler",
-                          style: GoogleFonts.openSans(
-                              fontSize: 18.sp,
-                              color: Colors.black
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        SizedBox(height: 10.w),
                       ],
                     ),
                   ),
                 ),
               ),
+              SizedBox(height: 30.h),
             ],
           ),
         ),

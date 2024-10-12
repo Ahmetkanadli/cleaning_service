@@ -1,10 +1,12 @@
-import 'package:clean_app/home_page.dart';
-import 'package:clean_app/login/reset_password.dart';
-import 'package:clean_app/login/sign_up.dart';
+
+import 'package:clean_app/services/auth_services.dart';
+import 'package:clean_app/view/login/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+
+import 'reset_password.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -172,8 +174,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 15),
                     ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => const HomePage()));
+                          AuthService().signin(
+                            context: context,
+                              email: _emailController.text,
+                              password: _passwordController.text,);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(255, 84, 64, 140),

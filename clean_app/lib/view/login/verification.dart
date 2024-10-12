@@ -1,5 +1,5 @@
 
-import 'package:clean_app/login/reset_password.dart';
+import 'package:clean_app/view/login/reset_password.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
