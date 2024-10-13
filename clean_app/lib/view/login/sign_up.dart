@@ -77,14 +77,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 const SizedBox(height: 7),
-                Text(
-                  "Rüyalarınızı yorumlatmak için kayıt olun",
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
-                    color: const Color.fromARGB(255, 166, 166, 166),
-                  ),
-                ),
                 const SizedBox(height: 30),
                 Text(
                   "İsim",
@@ -213,9 +205,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 84, 64, 140),
+                    backgroundColor: const Color(0xFFD1461E),
                     disabledBackgroundColor:
-                    const Color.fromARGB(255, 84, 64, 140),
+                    const Color(0xFFD1461E),
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(48),
@@ -255,7 +247,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         style: GoogleFonts.roboto(
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
-                          color: const Color.fromARGB(255, 84, 64, 140),
+                          color: const Color(0xFFD1461E)
                         ),
                       ),
                     ),
@@ -394,7 +386,7 @@ class CongratulationPage extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 84, 64, 140),
+                backgroundColor: const Color(0xFFD1461E),
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(48),

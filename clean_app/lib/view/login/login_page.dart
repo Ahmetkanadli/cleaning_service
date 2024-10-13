@@ -180,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                               password: _passwordController.text,);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 84, 64, 140),
+                          backgroundColor: const Color(0xFFD1461E),
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(48),
@@ -215,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.roboto(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 16,
-                                color: const Color.fromARGB(255, 84, 64, 140),
+                                color: const Color(0xFFD1461E)
                               ))),
                     ]),
                     const SizedBox(height: 15),
@@ -232,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.roboto(
                                   fontWeight: FontWeight.w400,
                                   fontSize: 14,
-                                  color: const Color.fromARGB(255, 166, 166, 166))),
+                                  color: const Color(0xFFBEBEBE))),
                         ),
                         const Expanded(
                           child: Divider(
@@ -251,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                         side: const BorderSide(
-                          color: Color.fromARGB(255, 232, 232, 232),
+                          color: Color(0xFFD1461E),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),

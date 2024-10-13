@@ -11,7 +11,7 @@ class ServiceModel {
   final String cleaningPlace;
   final String numberOfRoomsOrArea;
   final int cleaningTime;
-  final String status; // Add status field
+  final String status;
 
   ServiceModel({
     required this.city,
@@ -23,7 +23,7 @@ class ServiceModel {
     required this.cleaningPlace,
     required this.numberOfRoomsOrArea,
     required this.cleaningTime,
-    required this.status, // Initialize status field
+    required this.status,
   });
 
   Map<String, dynamic> toMap() {
@@ -37,7 +37,7 @@ class ServiceModel {
       'cleaningPlace': cleaningPlace,
       'numberOfRoomsOrArea': numberOfRoomsOrArea,
       'cleaningTime': cleaningTime,
-      'status': status, // Add status to map
+      'status': status,
     };
   }
 

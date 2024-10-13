@@ -11,17 +11,36 @@ class DataBaseOperations{
   }
 
   Future<List<Map<String, dynamic>>> getPastServices() async {
-
     String? userId = FirebaseAuth.instance.currentUser?.uid;
 
     try {
-      QuerySnapshot querySnapshot = await _firestore
+      // Tek belge olan 'servicesList'i alıyoruz
+      DocumentSnapshot servicesSnapshot = await _firestore
           .collection('users')
           .doc(userId)
           .collection('past_services')
-          .orderBy('timestamp', descending: true)
+          .doc('servicesList')
           .get();
-      return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+      if (servicesSnapshot.exists) {
+        Map<String, dynamic>? data = servicesSnapshot.data() as Map<String, dynamic>?;
+
+        if (data != null && data.containsKey('services')) {
+          List<dynamic> pastServices = data['services'];
+
+          // Zaman damgasına göre sıralıyoruz
+          pastServices.sort((a, b) {
+            DateTime timestampA = (a['timestamp'] as Timestamp).toDate();
+            DateTime timestampB = (b['timestamp'] as Timestamp).toDate();
+            return timestampB.compareTo(timestampA); // Descending order
+          });
+
+          return pastServices.map((service) => service as Map<String, dynamic>).toList();
+        }
+      }
+
+      // Eğer belge yoksa veya veri boşsa, boş bir liste döner
+      return [];
     } catch (e) {
       print("Error getting past services: $e");
       return [];
@@ -32,29 +51,100 @@ class DataBaseOperations{
     required String userId,
     required ServiceModel service,
   }) async {
+    DocumentReference userRef = _firestore.collection('users').doc(userId);
+    DocumentReference servicesRef = userRef.collection("past_services").doc('servicesList'); // Tek bir belge
+
     try {
-      await _firestore.collection('users').doc(userId).collection("past_services")
-          .add(service.toMap());
+      // Mevcut servislerin listesini alıyoruz
+      DocumentSnapshot snapshot = await servicesRef.get();
+      List<dynamic> pastServices = [];
+
+      if (snapshot.exists) {
+        // Eğer belge varsa, mevcut servislere ek yapacağız
+        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+        if (data != null && data.containsKey('services')) {
+          pastServices = data['services']; // Servisler listesi
+        }
+      }
+
+      // Yeni servisi listenin sonuna ekliyoruz
+      pastServices.add(service.toMap());
+
+      // Listeyi yeniden Firestore'a yazıyoruz
+      await servicesRef.set({'services': pastServices});
+
+      print("Service added successfully.");
     } catch (e) {
       print("Error adding past service: $e");
     }
   }
 
-  // lib/services/database_operations.dart
+  Future<void> updatePastService({
+    required String userId,
+    required int serviceIndex, // Düzenlenecek servisin indeksi
+    required ServiceModel updatedService, // Güncellenmiş servis
+  }) async {
+    DocumentReference servicesRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('past_services')
+        .doc('servicesList');
+
+    try {
+      // Mevcut servis listesini alıyoruz
+      DocumentSnapshot snapshot = await servicesRef.get();
+      if (snapshot.exists) {
+        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+        if (data != null && data.containsKey('services')) {
+          List<dynamic> pastServices = data['services'];
+
+          if (serviceIndex >= 0 && serviceIndex < pastServices.length) {
+            // Belirli servisi güncelle
+            pastServices[serviceIndex] = updatedService.toMap();
+
+            // Güncellenmiş listeyi yeniden Firestore'a yaz
+            await servicesRef.update({'services': pastServices});
+            print("Service updated successfully.");
+          } else {
+            print("Error: Invalid service index.");
+          }
+        }
+      }
+    } catch (e) {
+      print("Error updating service: $e");
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAllUsersPastServices() async {
     try {
       QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
       List<Map<String, dynamic>> allPastServices = [];
 
+      // Tüm kullanıcıları döngüyle gez
       for (var userDoc in usersSnapshot.docs) {
         var userData = userDoc.data() as Map<String, dynamic>?;
         if (userData != null) {
           String userName = userData['name'];
-          QuerySnapshot pastServicesSnapshot = await userDoc.reference.collection('past_services').orderBy('timestamp', descending: true).get();
-          for (var serviceDoc in pastServicesSnapshot.docs) {
-            Map<String, dynamic> serviceData = serviceDoc.data() as Map<String, dynamic>;
-            serviceData['userName'] = userName; // Add user name to service data
-            allPastServices.add(serviceData);
+
+          // Her kullanıcının past_services koleksiyonundaki 'servicesList' belgesini oku
+          DocumentSnapshot servicesSnapshot = await userDoc.reference
+              .collection('past_services')
+              .doc('servicesList')
+              .get();
+
+          if (servicesSnapshot.exists) {
+            Map<String, dynamic>? servicesData = servicesSnapshot.data() as Map<String, dynamic>?;
+
+            if (servicesData != null && servicesData.containsKey('services')) {
+              List<dynamic> pastServices = servicesData['services'];
+
+              // Her servisi gez ve kullanıcı adını ekleyerek tüm servisler listesine ekle
+              for (var service in pastServices) {
+                Map<String, dynamic> serviceData = service as Map<String, dynamic>;
+                serviceData['userName'] = userName; // Kullanıcı adını servise ekle
+                allPastServices.add(serviceData);
+              }
+            }
           }
         }
       }
