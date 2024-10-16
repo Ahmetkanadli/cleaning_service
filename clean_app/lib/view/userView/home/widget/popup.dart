@@ -2,6 +2,7 @@
 import 'package:clean_app/models/service_model.dart';
 import 'package:clean_app/services/auth_services.dart';
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/view/userView/payment_screen/payment_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -405,9 +406,12 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                   status: 'not_done',
                 );
                 await DataBaseOperations().addPastService(userId: userId, service: service);
-
-                // Navigate to the payment page
-                Navigator.of(context).pop();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return PaymentPopup(amount: _minimumFee);
+                  },
+                );
               }
             },
             child: Text("Ödeme Sayfasına Git",style: GoogleFonts.inter(

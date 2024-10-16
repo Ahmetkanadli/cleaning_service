@@ -1,5 +1,6 @@
 import 'package:clean_app/firebase_options.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
+import 'package:clean_app/view/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor:
                 Colors.white,
           ),
-          home: const AdminView(),
+          home: const SplashScreen(),
         );
       },
     );
