@@ -51,7 +51,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (NavigationRequest request) async {
-            if (request.url.contains("https://www.siteniz.com/odeme_basarili.php")) {
+            if (request.url.contains("https://sabosoftware.com/odeme_basarili.php")) {
               await _handlePaymentSuccess();
               return NavigationDecision.prevent;
             }
@@ -75,7 +75,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         cleaningPlace: widget.cleaningPlace,
         numberOfRoomsOrArea: "${widget.roomIndex + 1}",
         cleaningTime: widget.cleaningIndex + 3,
-        status: 'not_done',
+        status: 'Yapılmadı',
       );
 
       await DataBaseOperations().addPastService(userId: userId, service: service);

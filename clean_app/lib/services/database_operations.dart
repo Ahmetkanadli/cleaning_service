@@ -115,6 +115,35 @@ class DataBaseOperations{
     }
   }
 
+  Future<void> updateServiceStatus(String userId, String merchantOid, String newStatus) async {
+    DocumentReference servicesRef = _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('past_services')
+        .doc('servicesList');
+
+    try {
+      DocumentSnapshot snapshot = await servicesRef.get();
+      if (snapshot.exists) {
+        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+        if (data != null && data.containsKey('services')) {
+          List<dynamic> pastServices = data['services'];
+
+          int index = pastServices.indexWhere((service) => service['merchantOid'] == merchantOid);
+          if (index != -1) {
+            pastServices[index]['status'] = newStatus;    
+            await servicesRef.update({'services': pastServices});
+            print("Sipariş durumu başarıyla güncellendi.");
+          } else {
+            print("Hata: Belirtilen merchantOid ile eşleşen sipariş bulunamadı.");
+          }
+        }
+      }
+    } catch (e) {
+      print("Sipariş durumu güncellenirken hata oluştu: $e");
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAllUsersPastServices() async {
     try {
       QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
@@ -124,7 +153,9 @@ class DataBaseOperations{
       for (var userDoc in usersSnapshot.docs) {
         var userData = userDoc.data() as Map<String, dynamic>?;
         if (userData != null) {
+          String docID = userDoc.id; // Kullanıcının docID'sini al
           String userName = userData['name'];
+          print("DocID: $docID, UserName: $userName");
 
           // Her kullanıcının past_services koleksiyonundaki 'servicesList' belgesini oku
           DocumentSnapshot servicesSnapshot = await userDoc.reference
@@ -138,17 +169,17 @@ class DataBaseOperations{
             if (servicesData != null && servicesData.containsKey('services')) {
               List<dynamic> pastServices = servicesData['services'];
 
-              // Her servisi gez ve kullanıcı adını ekleyerek tüm servisler listesine ekle
+              // Her servisi gez ve kullanıcı docID'sini ekleyerek tüm servisler listesine ekle
               for (var service in pastServices) {
                 Map<String, dynamic> serviceData = service as Map<String, dynamic>;
-                serviceData['userName'] = userName; // Kullanıcı adını servise ekle
+                serviceData['userDocID'] = docID; // Kullanıcı docID'sini servise ekle
+                serviceData['userName'] = userName; // Kullanıcı adını da ekleyelim
                 allPastServices.add(serviceData);
               }
             }
           }
         }
       }
-
       return allPastServices;
     } catch (e) {
       print("Error getting all users' past services: $e");

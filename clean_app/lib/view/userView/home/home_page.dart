@@ -79,13 +79,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            SizedBox(width: 20.w),
-            Text(
-              userName,
+            SizedBox(width: 25.w),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                "Pestvet Temizlik",
               style: GoogleFonts.inter(
                 fontSize: 22.sp,
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -98,6 +101,48 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
+               Container(
+                 padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
+                 decoration: BoxDecoration(
+                   color: const Color(0xFFD1461E).withOpacity(0.1),
+                   borderRadius: BorderRadius.circular(15.r),
+                 ),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     Row(
+                       children: [
+                         Text(
+                           'Hoşgeldin, ',
+                           style: GoogleFonts.inter(
+                             fontSize: 16.sp,
+                             color: Colors.black,
+                             fontWeight: FontWeight.w500,
+                           ),
+                         ),
+                         Text(
+                           '$userName',
+                           style: GoogleFonts.inter(
+                             fontSize: 17.sp,
+                             color: const Color(0xFFD1461E),
+                             fontWeight: FontWeight.w700,
+                           ),
+                         ),
+                       ],
+                     ),
+                     SizedBox(height: 5.h),
+                     Text(
+                       'İhtiyacınıza uygun hizmeti seçin',
+                       style: GoogleFonts.inter(
+                         fontSize: 16.sp,
+                         color: Colors.black,
+                         fontWeight: FontWeight.w400,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+               SizedBox(height: 20.h),
               Lottie.asset(
                 'assets/animations/clean_animation_orange.json',
                 width: 300.w,

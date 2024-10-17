@@ -1,5 +1,5 @@
-// lib/view/adminView/admin_view.dart
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/view/adminView/price_update.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,16 +19,18 @@ class _AdminViewState extends State<AdminView> {
   List<Map<String, dynamic>> filteredServices = [];
   String filterType = 'all';
   String selectedFilter = 'Tümü';
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final DataBaseOperations _dbOperations = DataBaseOperations();
 
   @override
   void initState() {
     super.initState();
-    userName = DataBaseOperations().getUserName();
+    userName = _dbOperations.getUserName();
     _fetchServices();
   }
 
   Future<void> _fetchServices() async {
-    List<Map<String, dynamic>> services = await DataBaseOperations().getAllUsersPastServices();
+    List<Map<String, dynamic>> services = await _dbOperations.getAllUsersPastServices();
     setState(() {
       allPastServices = services;
       filteredServices = services;
@@ -40,9 +42,9 @@ class _AdminViewState extends State<AdminView> {
       filterType = type;
       selectedFilter = _getFilterName(type);
       if (type == 'done') {
-        filteredServices = allPastServices.where((service) => service['status'] == 'done').toList();
+        filteredServices = allPastServices.where((service) => service['status'] == 'Tamamlandı').toList();
       } else if (type == 'not_done') {
-        filteredServices = allPastServices.where((service) => service['status'] == 'not_done').toList();
+        filteredServices = allPastServices.where((service) => service['status'] == 'Yapılmadı').toList();
       } else {
         filteredServices = allPastServices;
       }
@@ -72,13 +74,13 @@ class _AdminViewState extends State<AdminView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFD1461E), // header background color
-              onPrimary: Colors.white, // header text color
-              onSurface: Colors.black, // body text color
+              primary: Color(0xFFD1461E),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                backgroundColor: Colors.white, // button text color
+                backgroundColor: Colors.white,
               ),
             ),
           ),
@@ -102,100 +104,154 @@ class _AdminViewState extends State<AdminView> {
     });
   }
 
-  void _showServiceDetails(BuildContext context, Map<String, dynamic> service) {
+  void _showServiceDetails(BuildContext context, Map<String, dynamic> service, int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text(
-            "Hizmet Detayı",
-            style: GoogleFonts.interTight(
-              fontSize: 18.sp,
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Müşteri: ${service['userName']}",
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text(
+                "Hizmet Detayı",
                 style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
+                  fontSize: 18.sp,
                   color: Colors.black,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              Text("Şehir: ${service['city']}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Sipariş No: ${service['merchantOid']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Müşteri: ${service['userName']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Şehir: ${service['city']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("İlçe: ${service['district']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Adres: ${service['address']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Telefon: ${service['phone']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Ücret: ${service['fee']} TL",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Tarih: ${DateFormat('dd/MM/yyyy HH:mm').format((service['timestamp'] as Timestamp).toDate())}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  Text("Durum: ${service['status']}",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text("Durum:",
+                    style: GoogleFonts.interTight(
+                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: service['status'],
+                    items: <String>['Tamamlandı', 'Ekip yolda', 'Yapılmadı']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        _updateServiceStatus(service['userDocID'], service['merchantOid'], newValue);
+                        setState(() {
+                          service['status'] = newValue;
+                        });
+                      }
+                    },
+                    dropdownColor: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
               ),
-              Text("İlçe: ${service['district']}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "Kapat",
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFFD1461E),
+                    ),
+                  ),
                 ),
-              ),
-              Text("Adres: ${service['address']}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text("Telefon: ${service['phone']}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text("Ücret: ${service['fee']} TL",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text("Tarih: ${DateFormat('dd/MM/yyyy HH:mm').format((service['timestamp'] as Timestamp).toDate())}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              Text("Durum: ${service['status'] == 'done' ? 'Yapıldı' : 'Yapılmadı'}",
-                style: GoogleFonts.interTight(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Kapat",
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFFD1461E),
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
+  }
+
+  Future<void> _updateServiceStatus(String userId, String merchantOid, String newStatus) async {
+    try {
+      await _dbOperations.updateServiceStatus(userId, merchantOid, newStatus);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sipariş durumu güncellendi')),
+      );
+      await _fetchServices();
+    } catch (e) {
+      print('Sipariş durumu güncellenirken hata oluştu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sipariş durumu güncellenirken bir hata oluştu')),
+      );
+    }
   }
 
   void _showSearchDialog() {
@@ -270,6 +326,73 @@ class _AdminViewState extends State<AdminView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        backgroundColor: Colors.white,
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Center(
+                child: Image.asset('assets/pestvet_logo.png', height: 250.h, width: 200.w,),
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Fiyat Güncelleme',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PriceUpdateScreen()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Siparişler',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              onTap: () {
+                // Siparişleri görüntüleme işlemleri burada yapılabilir
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Müşteri Ekle',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              onTap: () {
+                // Müşteri ekleme işlemleri burada yapılabilir
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Çıkış Yap',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              onTap: () {
+                // Müşteri ekleme işlemleri burada yapılabilir
+              },
+            ),
+          ],
+        ),
+      ),
       backgroundColor: Colors.white,
       appBar: AppBar(
         shape: RoundedRectangleBorder(
@@ -278,7 +401,7 @@ class _AdminViewState extends State<AdminView> {
           ),
         ),
         iconTheme: const IconThemeData(
-          color: Colors.white, // Set the back button color to white
+          color: Colors.white,
         ),
         backgroundColor: const Color(0xFFD1461E).withOpacity(0.9),
         title: Text(
@@ -325,10 +448,12 @@ class _AdminViewState extends State<AdminView> {
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
-                    if (newValue == 'date') {
-                      _selectDate(context);
-                    } else {
-                      _filterServices(newValue!);
+                    if (newValue != null) {
+                      if (newValue == 'date') {
+                        _selectDate(context);
+                      } else {
+                        _filterServices(newValue);
+                      }
                     }
                   },
                 ),
@@ -337,14 +462,14 @@ class _AdminViewState extends State<AdminView> {
           ),
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: DataBaseOperations().getAllUsersPastServices(),
+              future: _dbOperations.getAllUsersPastServices(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('An error occurred: ${snapshot.error}'));
+                  return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No past services found.'));
+                  return const Center(child: Text('Geçmiş hizmet bulunamadı.'));
                 } else {
                   return ListView.builder(
                     physics: const BouncingScrollPhysics(),
@@ -363,7 +488,7 @@ class _AdminViewState extends State<AdminView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Müşteri: ${service['userName']}",
+                                  "Müşteri: ${service['userName']} ${index}",
                                   style: GoogleFonts.inter(
                                     fontSize: 16.sp,
                                     color: Colors.black,
@@ -429,7 +554,7 @@ class _AdminViewState extends State<AdminView> {
                                   ),
                                 ),
                                 Text(
-                                  "Durum: ${service['status'] == 'done' ? 'Yapıldı' : 'Yapılmadı'}",
+                                  "Durum: ${service['status']}",
                                   style: GoogleFonts.inter(
                                     fontSize: 16.sp,
                                     color: Colors.black,
@@ -438,7 +563,7 @@ class _AdminViewState extends State<AdminView> {
                                 ),
                               ],
                             ),
-                            onTap: () => _showServiceDetails(context, service),
+                            onTap: () => _showServiceDetails(context, service, index),
                           ),
                         ),
                       );

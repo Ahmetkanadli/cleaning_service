@@ -34,8 +34,8 @@ class PaymentService {
       ["Örnek ürün", amount.toString(), "1"]
     ])));
 
-    String merchantOkUrl = "https://www.siteniz.com/odeme_basarili.php";
-    String merchantFailUrl = "https://www.siteniz.com/odeme_hata.php";
+    String merchantOkUrl = "https://sabosoftware.com/odeme_basarili.php";
+    String merchantFailUrl = "https://sabosoftware.com/odeme_hata.php";
     String userIp = await _getUserIp();
 
     String hashStr = merchantId +

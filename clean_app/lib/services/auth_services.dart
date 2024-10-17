@@ -12,60 +12,62 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> signup({
-    required String name,
-    required String email,
-    required String password,
-    required BuildContext context,
-  }) async {
-    String errorMessage = '';
+  required String name,
+  required String email,
+  required String password,
+  required BuildContext context,
+}) async {
+  String errorMessage = '';
 
-    try {
-      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      if (credential != null) {
-        await credential.user?.sendEmailVerification();
+    if (credential != null) {
+      await credential.user?.sendEmailVerification();
 
-        // Firestore'a kullanıcı belgesi ekleme
-        await _firestore.collection('users').doc(credential.user?.uid).set({
-          'name': name,
-          'email': email,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+      // Firestore'a kullanıcı belgesi ekleme
+      String docID = credential.user?.uid ?? '';
+      await _firestore.collection('users').doc(docID).set({
+        'name': name,
+        'email': email,
+        'docID': docID, // Add docID to the Firestore document
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-        _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (BuildContext context) => const CongratulationPage()),
-          );
-        });
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        errorMessage = "Şifre çok zayıf.";
-      } else if (e.code == 'email-already-in-use') {
-        errorMessage = "Bu e-posta adresi zaten kullanımda.";
-      } else if (e.code == 'invalid-email') {
-        errorMessage = "Geçersiz e-posta adresi.";
-      } else if (e.code == 'network-request-failed') {
-        errorMessage ='Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.';
-      } else {
-        print("hata : ${e.code}");
-        errorMessage = "Kayıt sırasında bir hata oluştu: ${e.message}";
-      }
-    } catch (e) {
-      print("hata : ${e.toString()}");
-      errorMessage = "Bilinmeyen bir hata oluştu.";
-    }
-
-    if (errorMessage != '') {
-      _showErrorDialog(context, "Hata", errorMessage, () {
-        Navigator.of(context).pop();
+      _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (BuildContext context) => const CongratulationPage()),
+        );
       });
     }
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'weak-password') {
+      errorMessage = "Şifre çok zayıf.";
+    } else if (e.code == 'email-already-in-use') {
+      errorMessage = "Bu e-posta adresi zaten kullanımda.";
+    } else if (e.code == 'invalid-email') {
+      errorMessage = "Geçersiz e-posta adresi.";
+    } else if (e.code == 'network-request-failed') {
+      errorMessage = 'Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.';
+    } else {
+      print("hata : ${e.code}");
+      errorMessage = "Kayıt sırasında bir hata oluştu: ${e.message}";
+    }
+  } catch (e) {
+    print("hata : ${e.toString()}");
+    errorMessage = "Bilinmeyen bir hata oluştu.";
   }
+
+  if (errorMessage != '') {
+    _showErrorDialog(context, "Hata", errorMessage, () {
+      Navigator.of(context).pop();
+    });
+  }
+}
 
   Future<void> signin({
     required String email,
