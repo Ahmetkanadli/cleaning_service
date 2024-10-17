@@ -1,3 +1,4 @@
+import 'package:clean_app/models/product.dart';
 import 'package:clean_app/models/service_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -185,6 +186,47 @@ class DataBaseOperations{
       print("Error getting all users' past services: $e");
       return [];
     }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchProducts() async {
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('products').get();
+      List<Map<String, dynamic>> products = [];
+
+      for (var doc in snapshot.docs) {
+        Product product = Product.fromMap(doc.data() as Map<String, dynamic>);
+        products.add(product.toMap());
+      }
+      print("products: $products");
+      return products;
+    } catch (e) {
+      print('Error fetching products: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getActiveServices(String? userId) async {
+    if (userId == null) return [];
+
+    try {
+      DocumentSnapshot snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('past_services')
+          .doc('servicesList')
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+        if (data != null && data.containsKey('services')) {
+          List<dynamic> services = data['services'];
+          return services.where((service) => service['status'] == 'Yapılmadı').map((service) => service as Map<String, dynamic>).toList();
+        }
+      }
+    } catch (e) {
+      print("Error getting active services: $e");
+    }
+    return [];
   }
 
 }

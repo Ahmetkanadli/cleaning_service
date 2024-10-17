@@ -1,4 +1,5 @@
 // lib/popup.dart
+import 'package:clean_app/models/product.dart';
 import 'package:clean_app/models/service_model.dart';
 import 'package:clean_app/services/auth_services.dart';
 import 'package:clean_app/services/database_operations.dart';
@@ -69,7 +70,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture
           children: [
             _buildPage(widget.pageName == "Ev Temizliği" ? _buildFirstPage() : _buildFirstPageOfis()),
-            _buildPage(_buildSecondPage()),
+            //_buildPage(_buildSecondPage()),
             _buildPage(_buildThirdPage()),
             _buildPage(_buildFourthPage()),
           ],
@@ -158,9 +159,9 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             }
           },
           child: Text("Devam", style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
           ) ,),
         ),
       ],
@@ -168,55 +169,77 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
   }
 
   Widget _buildFirstPage() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text("Evin Oda sayısı kaç", style: _headerTextStyle),
-        const SizedBox(height: 20),
-        _buildOptionButton("1+0", 0, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 800;
-          });
-        }),
-        _buildOptionButton("1+1", 1, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
-        _buildOptionButton("2+1", 2, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
-        _buildOptionButton("3+1", 3, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
-        SizedBox(height: 10.h),
-        ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 30.h),
+          Text("Evin Oda sayısı kaç", style: _headerTextStyle),
+          const SizedBox(height: 20),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: DataBaseOperations().fetchProducts(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Hata ile karşılaşıldı: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('Hizmet Bulunamadı'));
+              } else {
+                // Filter out products with empty room_count
+                List<Map<String, dynamic>> filteredProducts = snapshot.data!.where((product) {
+                  return product['room_count'].isNotEmpty;
+                }).toList();
+
+                // Sort products based on the first digit of room_count in descending order
+                filteredProducts.sort((a, b) {
+                  int roomCountA = int.tryParse(a['room_count'][0]) ?? 0;
+                  int roomCountB = int.tryParse(b['room_count'][0]) ?? 0;
+                  return roomCountA.compareTo(roomCountB);
+                });
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    Product product = Product.fromMap(filteredProducts[index]);
+                    return _buildOptionButton(
+                      product.room_count ?? 'Unknown', // Provide a default value
+                      index,
+                      _selectedRoomIndex,
+                          (index) {
+                        setState(() {
+                          _selectedRoomIndex = index;
+                          _minimumFee = int.parse(product.price);
+                        });
+                      },
+                    );
+                  },
+                );
+              }
+            },
           ),
-          onPressed: () {
-            if (_selectedRoomIndex != -1) {
-              _pageController.nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeIn,
-              );
-            }
-          },
-          child: Text("Devam", style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          )),
-        ),
-      ],
+          SizedBox(height: 10.h),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+            ),
+            onPressed: () {
+              if (_selectedRoomIndex != -1) {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeIn,
+                );
+              }
+            },
+            child: Text("Devam", style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            )),
+          ),
+        ],
+      ),
     );
   }
 
@@ -471,13 +494,13 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                color: selectedIndex == index ? Colors.white : Colors.black,
-                fontWeight: FontWeight.w400
-            )
+              text,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  color: selectedIndex == index ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w400
+              )
           ),
         ),
       ),

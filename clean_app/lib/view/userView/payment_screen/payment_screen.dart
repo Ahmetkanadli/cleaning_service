@@ -1,3 +1,4 @@
+import 'package:clean_app/view/userView/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -79,16 +80,74 @@ class _PaymentScreenState extends State<PaymentScreen> {
       );
 
       await DataBaseOperations().addPastService(userId: userId, service: service);
+
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+            (Route<dynamic> route) => false,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor : Colors.white,
       appBar: AppBar(
-        title: const Text('Ödeme Sayfası'),
+        backgroundColor: const Color(0xFFD1461E).withOpacity(0.9),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10.r),
+          ),
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Set the back button color to white
+        ),
+        title: Text(
+          'Ödeme Sayfası',
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
-      body: WebViewWidget(controller: _controller),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              elevation: 10,
+              color: Colors.white,
+              child: SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Alınacak Hizmet", style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+                      Text("Email: ${widget.email}", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Adres: ${widget.address}", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Telefon: ${widget.phone}", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Ödeme: ${widget.fee} TL", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Hizmet Türü: ${widget.cleaningPlace}", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Temizlik Süresi: ${widget.cleaningIndex + 3} Saat", style: GoogleFonts.inter(fontSize: 16.sp)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Card(
+                elevation: 10,
+                color: Colors.white,
+                child: WebViewWidget(controller: _controller)),
+          ),
+        ],
+      ),
     );
   }
 }

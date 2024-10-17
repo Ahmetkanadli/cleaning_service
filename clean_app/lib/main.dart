@@ -17,6 +17,7 @@ void main() async {
   await Hive.initFlutter(appDocumentDir.path);
   await Hive.openBox('userBox');
 
+
   runApp(const MyApp());
 }
 
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
             ),
             scaffoldBackgroundColor: Colors.white,
           ),
-          home: const SplashScreen(),
+          home: const AdminView(),
         );
       },
     );
