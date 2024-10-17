@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -172,27 +173,38 @@ class _LoginPageState extends State<LoginPage> {
                                   color: const Color.fromARGB(255, 84, 64, 140),
                                 )))),
                     const SizedBox(height: 15),
-                    ElevatedButton(
-                        onPressed: () {
-                          AuthService().signin(
-                            context: context,
-                              email: _emailController.text,
-                              password: _passwordController.text,);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD1461E),
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(48),
-                          ),
+                    _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        await AuthService().signin(
+                          context: context,
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                        );
+                        setState(() {
+                          _isLoading = false;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD1461E),
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(48),
                         ),
-                        child: Text(
-                          "Giriş Yap",
-                          style: GoogleFonts.openSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: (const Color.fromARGB(255, 255, 255, 255))),
-                        )),
+                      ),
+                      child: Text(
+                        "Giriş Yap",
+                        style: GoogleFonts.openSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                        ),
+                      ),
+                    ),
                     const SizedBox(
                       height: 20,
                     ),

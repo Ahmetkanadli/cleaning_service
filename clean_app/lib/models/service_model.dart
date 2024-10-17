@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ServiceModel {
+  final String merchantOid;
   final String city;
   final String district;
   final String address;
@@ -14,6 +15,7 @@ class ServiceModel {
   final String status;
 
   ServiceModel({
+    required this.merchantOid,
     required this.city,
     required this.district,
     required this.address,
@@ -28,6 +30,7 @@ class ServiceModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'merchantOid': merchantOid,
       'city': city,
       'district': district,
       'address': address,
@@ -43,6 +46,7 @@ class ServiceModel {
 
   factory ServiceModel.fromMap(Map<String, dynamic> map) {
     return ServiceModel(
+      merchantOid: map['merchantOid'],
       city: map['city'],
       district: map['district'],
       address: map['address'],

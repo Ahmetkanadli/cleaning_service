@@ -4,6 +4,7 @@ import 'package:clean_app/view/userView/pastServices/past_services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'widget/popup.dart'; // Import the updated widget
@@ -18,9 +19,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _controller;
   late AnimationController _homeAnimationController;
-  late Future<String> userName;
+  late String userName;
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -33,7 +33,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     _controller.forward();
     _homeAnimationController.forward();
-    userName = DataBaseOperations().getUserName();
+
+    // Retrieve the user's name from Hive asynchronously
+    _retrieveUserName();
+  }
+
+  Future<void> _retrieveUserName() async {
+    var box = Hive.box('userBox');
+    userName = box.get('userName', defaultValue: 'Hoşgeldiniz');
+    setState(() {});
   }
 
   @override
@@ -67,30 +75,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   child: Icon(
                     CupertinoIcons.person,
                     size: 30.w,
-
                   ),
                 ),
               ),
             ),
             SizedBox(width: 20.w),
-            FutureBuilder<String>(
-              future: userName,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error');
-                } else {
-                  return Text(
-                    snapshot.data ?? '',
-                    style: GoogleFonts.inter(
-                      fontSize: 22.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  );
-                }
-              },
+            Text(
+              userName,
+              style: GoogleFonts.inter(
+                fontSize: 22.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),

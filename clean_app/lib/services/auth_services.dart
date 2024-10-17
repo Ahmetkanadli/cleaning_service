@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class AuthService {
 
@@ -48,7 +49,10 @@ class AuthService {
         errorMessage = "Bu e-posta adresi zaten kullanımda.";
       } else if (e.code == 'invalid-email') {
         errorMessage = "Geçersiz e-posta adresi.";
+      } else if (e.code == 'network-request-failed') {
+        errorMessage ='Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.';
       } else {
+        print("hata : ${e.code}");
         errorMessage = "Kayıt sırasında bir hata oluştu: ${e.message}";
       }
     } catch (e) {
@@ -76,6 +80,19 @@ class AuthService {
 
       if (_user.user!.uid.isNotEmpty) {
         if (_user.user!.emailVerified == true) {
+
+          // Kullanıcı ID'sini cihazda saklama
+          var box = Hive.box('userBox');
+          box.put('userId', _user.user!.uid);
+
+          // Kullanıcı adını cihazda saklama
+          box.put('userEmail', email);
+
+          // Kullanıcı adını cihazda saklama
+          DocumentSnapshot userDoc = await _firestore.collection('users').doc(_user.user!.uid).get();
+          String userName = userDoc['name'];
+          box.put('userName', userName);
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
@@ -98,6 +115,7 @@ class AuthService {
       }else if(e.code == 'invalid-credential'){
         message = 'e-posta adresi veya şifre hatalı.';
       } else {
+        print("hata : ${e.code}");
         message = 'Giriş sırasında bir hata oluştu.';
       }
       print("hata : ${e.code}");

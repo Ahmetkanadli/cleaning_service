@@ -22,6 +22,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool hasLetter = false;
   bool _obscureText = true;
   bool showPasswordRequirements = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -96,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         color: Color.fromARGB(255, 250, 250, 250),
                       ),
                     ),
-                    labelText: "İsminiz",
+                    labelText: "Ad-Soyad",
                     labelStyle: GoogleFonts.roboto(
                       fontSize: 16,
                       color: const Color.fromARGB(255, 184, 184, 184),
@@ -194,20 +195,28 @@ class _SignUpPageState extends State<SignUpPage> {
                     hasLetter: hasLetter,
                   ),
                 const SizedBox(height: 25),
-                ElevatedButton(
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
                   onPressed: hasEightCharacters && hasNumber && hasLetter
                       ? () async {
-                    AuthService().signup(
-                        name: _nameController.text,
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                        context: context);
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    await AuthService().signup(
+                      name: _nameController.text,
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                      context: context,
+                    );
+                    setState(() {
+                      _isLoading = false;
+                    });
                   }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFD1461E),
-                    disabledBackgroundColor:
-                    const Color(0xFFD1461E),
+                    disabledBackgroundColor: const Color(0xFFD1461E),
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(48),

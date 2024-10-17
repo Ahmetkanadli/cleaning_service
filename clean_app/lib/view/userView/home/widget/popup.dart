@@ -2,11 +2,13 @@
 import 'package:clean_app/models/service_model.dart';
 import 'package:clean_app/services/auth_services.dart';
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/services/payment_service.dart';
 import 'package:clean_app/view/userView/payment_screen/payment_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class MultiPagePopup extends StatefulWidget {
   const MultiPagePopup({super.key, required this.pageName});
@@ -362,8 +364,13 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       ),
     );
   }
+  bool _isLoading = false;
 
   Widget _buildFourthPage() {
+    var box = Hive.box('userBox');
+    String _name = box.get('userName', defaultValue: '');
+    String _email = box.get('userEmail', defaultValue: '');
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -385,36 +392,61 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           const SizedBox(height: 10),
           Text("Min. Ödeme Tutarı: $_minimumFee TL", style: const TextStyle(fontSize: 18)),
           SizedBox(height: 10.h),
-          ElevatedButton(
+          _isLoading
+              ? CircularProgressIndicator()
+              : ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+              backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFD1461E).withOpacity(0.9)),
             ),
             onPressed: () async {
-              String? userId = getCurrentUserId();
-              if (userId != null) {
-                // Add the service to past services
-                ServiceModel service = ServiceModel(
-                  city: _selectedCity!,
-                  district: _selectedDistrict!,
+              setState(() {
+                _isLoading = true;
+              });
+
+              try {
+                String merchantOid = DateTime.now().millisecondsSinceEpoch.toString();
+                String? token = await PaymentService().startPayment(
+                  amount: _minimumFee.toDouble(),
+                  email: _email,
+                  name: _name,
                   address: _address,
                   phone: _phoneNumber,
-                  fee: _minimumFee,
-                  timestamp: DateTime.now(),
-                  cleaningPlace: widget.pageName,
-                  numberOfRoomsOrArea: widget.pageName == "Ev Temizliği" ? "${_selectedRoomIndex + 1}" : _selectedRoomIndex == 0 ? '50 m²' : _selectedRoomIndex == 1 ? '100 m²' : _selectedRoomIndex == 2 ? '150 m²' : '150 m² üstü',
-                  cleaningTime: _selectedCleaningIndex + 3,
-                  status: 'not_done',
+                  merchantOid: merchantOid,
                 );
-                await DataBaseOperations().addPastService(userId: userId, service: service);
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return PaymentPopup(amount: _minimumFee);
-                  },
+
+                if (token != null) {
+                  String paymentUrl = "https://www.paytr.com/odeme/guvenli/$token";
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentScreen(
+                        paymentUrl: paymentUrl,
+                        name: _name,
+                        email: _email,
+                        city: _selectedCity!,
+                        district: _selectedDistrict!,
+                        address: _address,
+                        phone: _phoneNumber,
+                        fee: _minimumFee,
+                        roomIndex: _selectedRoomIndex,
+                        cleaningIndex: _selectedCleaningIndex,
+                        cleaningPlace: widget.pageName,
+                      ),
+                    ),
+                  );
+                }
+              } catch (e) {
+                print("hata : ${e.toString()}");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ödeme işlemi başarısız oldu: $e')),
                 );
               }
+
+              setState(() {
+                _isLoading = false;
+              });
             },
-            child: Text("Ödeme Sayfasına Git",style: GoogleFonts.inter(
+            child: Text("Ödeme Sayfasına Git", style: GoogleFonts.inter(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
               color: Colors.white,

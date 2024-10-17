@@ -1,7 +1,9 @@
 
 import 'package:clean_app/view/login/login_page.dart';
+import 'package:clean_app/view/userView/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -18,9 +20,19 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     Future.delayed(const Duration(seconds:2), () {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginPage(),
-          ));
+
+      var box = Hive.box('userBox');
+      String? userId = box.get('userId');
+
+      if (userId != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
     });
 
   }

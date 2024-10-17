@@ -5,28 +5,20 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class PaymentService {
-  late final String merchantId;
-  late final String merchantKey;
-  late final String merchantSalt;
+  final String merchantId = '350702';
+  final String merchantKey = 'LfZBD9Xruud6qFDq';
+   final String merchantSalt = 'RXQYFQz6a67Jr8F4';
 
-  PaymentService() {
-    _initializeRemoteConfig();
-  }
 
-  Future<void> _initializeRemoteConfig() async {
-    await Firebase.initializeApp();
-    final remoteConfig = FirebaseRemoteConfig.instance;
 
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(seconds: 10),
-      minimumFetchInterval: const Duration(hours: 1),
-    ));
-
-    await remoteConfig.fetchAndActivate();
-
-    merchantId = remoteConfig.getString('merchant_id');
-    merchantKey = remoteConfig.getString('merchant_key');
-    merchantSalt = remoteConfig.getString('merchant_salt');
+  Future<String> _getUserIp() async {
+    final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+    if (response.statusCode == 200) {
+      print(json.decode(response.body)['ip']);
+      return json.decode(response.body)['ip'];
+    } else {
+      throw Exception('Failed to get IP address');
+    }
   }
 
   Future<String?> startPayment({
@@ -35,17 +27,16 @@ class PaymentService {
     required String name,
     required String address,
     required String phone,
+    required String merchantOid,
   }) async {
-    String merchantOid = DateTime.now().millisecondsSinceEpoch.toString();
     int paymentAmount = (amount * 100).toInt();
-
     String userBasket = base64Encode(utf8.encode(jsonEncode([
       ["Örnek ürün", amount.toString(), "1"]
     ])));
 
     String merchantOkUrl = "https://www.siteniz.com/odeme_basarili.php";
     String merchantFailUrl = "https://www.siteniz.com/odeme_hata.php";
-    String userIp = "192.168.1.1"; // Replace with actual IP address
+    String userIp = await _getUserIp();
 
     String hashStr = merchantId +
         userIp +
