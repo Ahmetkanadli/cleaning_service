@@ -155,137 +155,139 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               SizedBox(height: 20.h),
               if (activeServices.isNotEmpty) ...[
                 SizedBox(height: 20.h),
-                ...activeServices.map((service) =>
-                    Card(
-                      color: Colors.white,
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 40.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD1461E).withOpacity(0.1),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15.r),
-                                topRight: Radius.circular(15.r),
-                              ),
+                ...activeServices.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  Map<String, dynamic> service = entry.value;
+                  return Card(
+                    color: Colors.white,
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD1461E).withOpacity(0.1),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(15.r),
+                              topRight: Radius.circular(15.r),
                             ),
-                            child: Row(
-                              children: [
-                                // Buraya Hizmet sayısı Yuvarlak bir icon içinde eklenecek ve dinamkik olarak güncellenecek
-                                SizedBox(width: 10.w),
-                                CircleAvatar(
-                                  backgroundColor: Colors.red, // İkonun arka plan rengi
-                                  radius: 15.r, // İkonun boyutu
-                                  child: Text(
-                                    activeServices.length.toString(), // Hizmet sayısı
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 10.w),
+                              CircleAvatar(
+                                backgroundColor: Colors.red, // İkonun arka plan rengi
+                                radius: 15.r, // İkonun boyutu
+                                child: Text(
+                                  (index + 1).toString(), // Hizmet sırası
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16.sp,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                SizedBox(width: 10.w),
-                                Text("Aktif Hizmetler",
-                                    textAlign: TextAlign.start,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 18.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                    )),
+                              ),
+                              SizedBox(width: 10.w),
+                              Text("Aktif Hizmetler",
+                                  textAlign: TextAlign.start,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18.sp,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        ListTile(
+                          titleAlignment: ListTileTitleAlignment.top,
+                          title: Container(
+                            color: Colors.white,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Aktif Hizmet: ${service['cleaningPlace']}",
+                                    style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
+                                Text("Adres: ${service['address']}",
+                                    style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
+                                Text("Telefon: ${service['phone']}",
+                                    style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
                               ],
                             ),
                           ),
-                          ListTile(
-                            titleAlignment: ListTileTitleAlignment.top,
-                            title: Container(
-                              color: Colors.white,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Aktif Hizmet: ${service['cleaningPlace']}",
-                                      style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
-                                  Text("Adres: ${service['address']}",
-                                      style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
-                                  Text("Telefon: ${service['phone']}",
-                                      style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.black)),
-                                ],
-                              ),
-                            ),
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    title: Text("Hizmet Detayları",style: GoogleFonts.interTight(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 18.sp,
-                                      color: Colors.black,
-                                    ),),
-                                    content: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text("Hizmet Türü: ${service['cleaningPlace']}",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  title: Text("Hizmet Detayları",style: GoogleFonts.interTight(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18.sp,
+                                    color: Colors.black,
+                                  ),),
+                                  content: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text("Hizmet Türü: ${service['cleaningPlace']}",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
                                         ),
-                                        Text("Adres: ${service['address']}",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                      ),
+                                      Text("Adres: ${service['address']}",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
                                         ),
-                                        Text("Telefon: ${service['phone']}",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                      ),
+                                      Text("Telefon: ${service['phone']}",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
                                         ),
-                                        Text("Ödeme: ${service['fee']} TL",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                      ),
+                                      Text("Ödeme: ${service['fee']} TL",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
                                         ),
-                                        Text("Temizlik Süresi: ${service['cleaningTime']} Saat",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                      ),
+                                      Text("Temizlik Süresi: ${service['cleaningTime']} Saat",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
                                         ),
-                                      ],
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Kapat"),
                                       ),
                                     ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    )).toList(),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Kapat"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ],
               activeServices != null ? SizedBox(height: 20.h,) :SizedBox(height: 50.h),
               Row(

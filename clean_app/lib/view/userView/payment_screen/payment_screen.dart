@@ -81,7 +81,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       await DataBaseOperations().addPastService(userId: userId, service: service);
 
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 1));
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),

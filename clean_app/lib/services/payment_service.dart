@@ -5,11 +5,29 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class PaymentService {
-  final String merchantId = '350702';
-  final String merchantKey = 'LfZBD9Xruud6qFDq';
-   final String merchantSalt = 'RXQYFQz6a67Jr8F4';
+  late String merchantId;
+  late String merchantKey;
+  late String merchantSalt;
 
+  PaymentService() {
+    _initializeRemoteConfig();
+  }
 
+  Future<void> _initializeRemoteConfig() async {
+    await Firebase.initializeApp();
+    final remoteConfig = FirebaseRemoteConfig.instance;
+
+    await remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(seconds: 10),
+      minimumFetchInterval: const Duration(hours: 1),
+    ));
+
+    await remoteConfig.fetchAndActivate();
+
+    merchantId = remoteConfig.getString('merchantId');
+    merchantKey = remoteConfig.getString('merchantKey');
+    merchantSalt = remoteConfig.getString('merchantSalt');
+  }
 
   Future<String> _getUserIp() async {
     final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));

@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
             ),
             scaffoldBackgroundColor: Colors.white,
           ),
-          home: const AdminView(),
+          home: const SplashScreen(),
         );
       },
     );
