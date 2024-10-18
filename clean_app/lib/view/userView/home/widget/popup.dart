@@ -121,30 +121,49 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       children: [
         Text("Ofis Kaç m²", style: _headerTextStyle),
         const SizedBox(height: 20),
-        _buildOptionButton("50 m²", 0, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 800;
-          });
-        }),
-        _buildOptionButton("100 m²", 1, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
-        _buildOptionButton("150 m²", 2, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
-        _buildOptionButton("150 üstü", 3, _selectedRoomIndex, (index) {
-          setState(() {
-            _selectedRoomIndex = index;
-            _minimumFee = 1700;
-          });
-        }),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: DataBaseOperations().fetchProducts(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Hata ile karşılaşıldı: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Hizmet Bulunamadı'));
+            } else {
+              // Filter out products with empty room_count
+              List<Map<String, dynamic>> filteredProducts = snapshot.data!.where((product) {
+                return product['product_area'].isNotEmpty;
+              }).toList();
+
+              // Sort products based on the first digit of room_count in descending order
+              filteredProducts.sort((a, b) {
+                int roomCountA = int.tryParse(a['product_area'][0]) ?? 0;
+                int roomCountB = int.tryParse(b['product_area'][0]) ?? 0;
+                return roomCountB.compareTo(roomCountA);
+              });
+
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: filteredProducts.length,
+                itemBuilder: (context, index) {
+                  Product product = Product.fromMap(filteredProducts[index]);
+                  return _buildOptionButton(
+                    '${product.product_area} m²' ?? 'Unknown', // Provide a default value
+                    index,
+                    _selectedRoomIndex,
+                        (index) {
+                      setState(() {
+                        _selectedRoomIndex = index;
+                        _minimumFee = int.parse(product.price);
+                      });
+                    },
+                  );
+                },
+              );
+            }
+          },
+        ),
         SizedBox(height: 10.h),
         ElevatedButton(
           style: ButtonStyle(

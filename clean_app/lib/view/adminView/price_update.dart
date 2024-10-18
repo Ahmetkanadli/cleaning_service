@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class PriceUpdateScreen extends StatefulWidget {
   @override
@@ -23,27 +24,72 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
     try {
       QuerySnapshot querySnapshot = await _firestore.collection('products').get();
       setState(() {
-        products = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        products = querySnapshot.docs.map((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          data['id'] = doc.id;
+          return data;
+        }).toList();
+        products.sort((a, b) => (a['price'] as num).compareTo(b['price'] as num));
         isLoading = false;
       });
     } catch (e) {
-      print('Ürünler yüklenirken hata oluştu: $e');
+      print('Error loading products: $e');
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  Future<void> _updatePrice(String productId, double newPrice) async {
+  Future<void> _updatePrice(String docId, String newPrice) async {
     try {
-      await _firestore.collection('products').doc(productId).update({'price': newPrice});
+      await _firestore.collection('products').doc(docId).update({'price': newPrice});
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fiyat başarıyla güncellendi')),
+        SnackBar(content: Text('Price updated successfully')),
       );
     } catch (e) {
-      print('Fiyat güncellenirken hata oluştu: $e');
+      print('Error updating price: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fiyat güncellenirken bir hata oluştu')),
+        SnackBar(content: Text('Error updating price')),
+      );
+    }
+    setState(() {
+
+    });
+  }
+
+  Future<void> _addPrice(String roomCount, String productArea, String price) async {
+    var uuid = Uuid();
+    String uniqueId = uuid.v4();
+    try {
+      await _firestore.collection('products').add({
+        if (roomCount != '') 'room_count': roomCount,
+        if (productArea != '') 'product_area': productArea,
+        'price': price,
+        'id': uniqueId
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Price added successfully')),
+      );
+      _loadProducts(); // Refresh the product list
+    } catch (e) {
+      print('Error adding price: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding price')),
+      );
+    }
+  }
+
+  Future<void> _deletePrice(String docId) async {
+    try {
+      await _firestore.collection('products').doc(docId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Price deleted successfully')),
+      );
+      _loadProducts(); // Refresh the product list
+    } catch (e) {
+      print('Error deleting price: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting price')),
       );
     }
   }
@@ -52,6 +98,9 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Set the back button color to white
+        ),
         title: Text(
           'Fiyat Güncelleme',
           style: GoogleFonts.inter(
@@ -64,59 +113,173 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return ListTile(
-                  title: Text(
-                    product['name'],
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w500,
+          : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+            final product = products[index];
+            return Card(
+              color: Colors.white,
+              elevation: 10,
+              child: ListTile(
+                title: Text(
+                  product['room_count']!= null ?
+                  'Oda Sayısı ${product['room_count'] }' :
+                  'Temizlik Alanı ${product['product_area']} m²' ?? 'Unknown',
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  '${product['price'] ?? '0'} TL',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () => _showUpdateDialog(product),
                     ),
-                  ),
-                  subtitle: Text(
-                    '${product['price']} TL',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () => _deletePrice(product['id']),
                     ),
+                  ],
+                ),
+              ),
+            );
+                    },
                   ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () => _showUpdateDialog(product),
-                  ),
-                );
-              },
+          ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddDialog(),
+        label: Row(
+          children: [
+            Text(
+              'Yeni Fiyat Ekle',
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
             ),
+            SizedBox(width: 8.w),
+            Icon(Icons.add_circle_outline_rounded, color: Colors.white),
+          ],
+        ),
+        backgroundColor: Color(0xFFD1461E),
+      ),
     );
   }
 
   void _showUpdateDialog(Map<String, dynamic> product) {
-    TextEditingController priceController = TextEditingController(text: product['price'].toString());
+    TextEditingController priceController = TextEditingController(text: product['price']?.toString() ?? '0');
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Fiyat Güncelle'),
+          title: Text('Update Price'),
           content: TextField(
             controller: priceController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: 'Yeni Fiyat'),
+            keyboardType: TextInputType.numberWithOptions(decimal: false),
+            decoration: InputDecoration(labelText: 'New Price'),
           ),
           actions: [
             TextButton(
-              child: Text('İptal'),
+              child: Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('Güncelle'),
+              child: Text('Update'),
               onPressed: () {
-                double newPrice = double.tryParse(priceController.text) ?? 0.0;
+                String newPrice = priceController.text;
                 _updatePrice(product['id'], newPrice);
                 Navigator.of(context).pop();
+                setState(() {
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _showAddDialog() {
+    TextEditingController roomCountController = TextEditingController();
+    TextEditingController productAreaController = TextEditingController();
+    TextEditingController priceController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text('Teklif Ekle'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Uyarı : Tek seferde yalnız Oda Sayısı veya Temizlik alanı Doldurulabilir.",
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.red,
+                ),
+              ),
+              TextField(
+                controller: roomCountController,
+                decoration: InputDecoration(labelText: 'Oda Sayısı'),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    productAreaController.clear();
+                  }
+                },
+              ),
+              TextField(
+                controller: productAreaController,
+                decoration: InputDecoration(labelText: 'Temizlik Alanı (m²)'),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    roomCountController.clear();
+                  }
+                },
+              ),
+              TextField(
+                controller: priceController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: 'Ücret'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Add'),
+              onPressed: () {
+                String? roomCount = roomCountController.text.isNotEmpty ? roomCountController.text : null;
+                String? productArea = productAreaController.text.isNotEmpty ? productAreaController.text : null;
+                String price = priceController.text;
+
+                if ((roomCount != null || productArea != null) && price.isNotEmpty) {
+                  _addPrice(roomCount ?? '', productArea ?? '', price);
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Lütfen gerekli tüm alanları doldurun')),
+                  );
+                }
               },
             ),
           ],

@@ -1,8 +1,11 @@
 import 'package:clean_app/services/database_operations.dart';
 import 'package:clean_app/view/adminView/price_update.dart';
+import 'package:clean_app/view/login/login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -339,55 +342,65 @@ class _AdminViewState extends State<AdminView> {
               ),
             ),
             ListTile(
-              title: Text(
-                'Fiyat Güncelleme',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
+              title: Row(
+                children: [
+                  const Icon(Icons.price_change, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Fiyat Güncelleme',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => PriceUpdateScreen()));
               },
             ),
             ListTile(
-              title: Text(
-                'Siparişler',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
+              title: Row(
+                children: [
+                  const Icon(Icons.shopping_cart, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Siparişler',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
               onTap: () {
                 // Siparişleri görüntüleme işlemleri burada yapılabilir
               },
             ),
             ListTile(
-              title: Text(
-                'Müşteri Ekle',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
+              title: Row(
+                children: [
+                  const Icon(Icons.exit_to_app, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Çıkış Yap',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
               onTap: () {
-                // Müşteri ekleme işlemleri burada yapılabilir
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Çıkış Yap',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              onTap: () {
-                // Müşteri ekleme işlemleri burada yapılabilir
+                Hive.box("userBox").clear();
+                FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => const LoginPage()),
+                );
               },
             ),
           ],

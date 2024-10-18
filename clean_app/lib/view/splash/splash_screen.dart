@@ -1,4 +1,5 @@
 
+import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/login/login_page.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +24,18 @@ class _SplashScreenState extends State<SplashScreen>
 
       var box = Hive.box('userBox');
       String? userId = box.get('userId');
+      bool? isAdmin = box.get('isAdmin');
 
       if (userId != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
+        if (isAdmin == true) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AdminView()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
       } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginPage()),

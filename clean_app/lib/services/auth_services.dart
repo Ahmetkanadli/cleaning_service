@@ -1,4 +1,5 @@
 
+import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/login/sign_up.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,6 +36,7 @@ class AuthService {
         'email': email,
         'docID': docID, // Add docID to the Firestore document
         'createdAt': FieldValue.serverTimestamp(),
+        "isAdmin": false,
       });
 
       _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
@@ -93,12 +95,23 @@ class AuthService {
           // Kullanıcı adını cihazda saklama
           DocumentSnapshot userDoc = await _firestore.collection('users').doc(_user.user!.uid).get();
           String userName = userDoc['name'];
+          bool isAdmin = userDoc['isAdmin'];
           box.put('userName', userName);
+          box.put('isAdmin', isAdmin);
+          print("isAdmin : ${box.get('isAdmin')}");
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
-          );
+          if(isAdmin == true){
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (BuildContext context) => const AdminView()),
+            );
+          }
+          else{
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+            );
+          }
         } else {
           await _user.user!.sendEmailVerification();
           _showErrorDialog(context, "Bilgi", 'E-posta doğrulaması gerekiyor. Lütfen e-postanızı kontrol edin.', () {

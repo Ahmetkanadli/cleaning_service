@@ -1,5 +1,7 @@
 
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/services/whatsapp%20service/whatsapp_service.dart';
+import 'package:clean_app/view/login/login_page.dart';
 import 'package:clean_app/view/userView/pastServices/past_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'widget/popup.dart'; // Import the updated widget
 
 class HomePage extends StatefulWidget {
@@ -57,15 +60,123 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final String pageName_1 = "Ev Temizliği";
   final String pageName_2 = "Ofis Temizliği";
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      drawer: Drawer(
+        backgroundColor: Colors.white,
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Center(
+                child: Image.asset('assets/pestvet_logo.png', height: 250.h, width: 200.w,),
+              ),
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  const Icon(Icons.home, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Ana Sayfa',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  const Icon(Icons.history, color: Color(0xFFD1461E),size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Siparişler',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+               Navigator.push(context, MaterialPageRoute(builder: (context)=>PastServices()));
+              },
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  const Icon(Icons.exit_to_app, color: Color(0xFFD1461E),size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Çıkış Yap',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Hive.box("userBox").clear();
+                FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => const LoginPage()),
+                );
+              },
+            ),
+
+            ListTile(
+              title: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
+                    child: Image.asset(
+                      "assets/images/whatsapp.png",
+                      height: 30,
+                      width: 30,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'İletişim',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: WhatsappService().launchWhatsApp,
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(10.r),
           ),
+        ),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Set the back button color to white
         ),
         backgroundColor: const Color(0xFFD1461E).withOpacity(0.9),
         title: Row(
@@ -200,6 +311,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
                                   )),
+                              Spacer(),
+                              Text("durum : ${service['status']}",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10.sp,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                  )),
+                              SizedBox(width: 10.w),
                             ],
                           ),
                         ),

@@ -220,7 +220,7 @@ class DataBaseOperations{
         Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
         if (data != null && data.containsKey('services')) {
           List<dynamic> services = data['services'];
-          return services.where((service) => service['status'] == 'Yapılmadı').map((service) => service as Map<String, dynamic>).toList();
+          return services.where((service) => service['status'] != 'Tamamlandı').map((service) => service as Map<String, dynamic>).toList();
         }
       }
     } catch (e) {
