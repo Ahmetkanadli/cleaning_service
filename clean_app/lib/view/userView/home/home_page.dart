@@ -1,5 +1,6 @@
 
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/services/payment_service.dart';
 import 'package:clean_app/services/whatsapp%20service/whatsapp_service.dart';
 import 'package:clean_app/view/login/login_page.dart';
 import 'package:clean_app/view/userView/pastServices/past_services.dart';
@@ -38,6 +39,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     _controller.forward();
     _homeAnimationController.forward();
+
+    PaymentService().initializeRemoteConfig();
 
     // Retrieve the user's name from Hive asynchronously
     _retrieveUserName();
@@ -164,7 +167,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-              onTap: WhatsappService().launchWhatsApp,
+              onTap: (){
+                  WhatsappService().launchWhatsApp('');
+                },
             ),
           ],
         ),
@@ -343,6 +348,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
+                                  actionsAlignment: MainAxisAlignment.spaceBetween,
                                   backgroundColor: Colors.white,
                                   title: Text("Hizmet Detayları",style: GoogleFonts.interTight(
                                     fontWeight: FontWeight.w600,
@@ -381,16 +387,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           fontWeight: FontWeight.w400,
                                         ),
                                       ),
-                                      Text("Temizlik Süresi: ${service['cleaningTime']} Saat",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
+
                                     ],
                                   ),
                                   actions: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        WhatsappService().launchWhatsApp('');
+                                      },
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
+                                        child: Image.asset(
+                                          "assets/images/whatsapp.png",
+                                          height: 30,
+                                          width: 30,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context).pop();

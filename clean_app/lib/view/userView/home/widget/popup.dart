@@ -21,8 +21,8 @@ class MultiPagePopup extends StatefulWidget {
 }
 
 class _MultiPagePopupState extends State<MultiPagePopup> {
-  int _selectedRoomIndex = -1;
-  int _selectedCleaningIndex = -1;
+  String? _selectedRoom;
+  String? _selectedCleaningTime;
   String? _selectedCity;
   String? _selectedDistrict;
   String _address = '';
@@ -31,27 +31,71 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
   final PageController _pageController = PageController();
 
   final List<String> _istanbulDistricts = [
-    "Adalar", "Arnavutköy", "Ataşehir", "Avcılar", "Bağcılar", "Bahçelievler", "Bakırköy", "Başakşehir", "Bayrampaşa", "Beşiktaş", "Beykoz", "Beylikdüzü", "Beyoğlu", "Büyükçekmece", "Çatalca", "Çekmeköy", "Esenler", "Esenyurt", "Eyüpsultan", "Fatih", "Gaziosmanpaşa", "Güngören", "Kadıköy", "Kağıthane", "Kartal", "Küçükçekmece", "Maltepe", "Pendik", "Sancaktepe", "Sarıyer", "Silivri", "Sultanbeyli", "Sultangazi", "Şile", "Şişli", "Tuzla", "Ümraniye", "Üsküdar", "Zeytinburnu"
+    "Adalar",
+    "Arnavutköy",
+    "Ataşehir",
+    "Avcılar",
+    "Bağcılar",
+    "Bahçelievler",
+    "Bakırköy",
+    "Başakşehir",
+    "Bayrampaşa",
+    "Beşiktaş",
+    "Beykoz",
+    "Beylikdüzü",
+    "Beyoğlu",
+    "Büyükçekmece",
+    "Çatalca",
+    "Çekmeköy",
+    "Esenler",
+    "Esenyurt",
+    "Eyüpsultan",
+    "Fatih",
+    "Gaziosmanpaşa",
+    "Güngören",
+    "Kadıköy",
+    "Kağıthane",
+    "Kartal",
+    "Küçükçekmece",
+    "Maltepe",
+    "Pendik",
+    "Sancaktepe",
+    "Sarıyer",
+    "Silivri",
+    "Sultanbeyli",
+    "Sultangazi",
+    "Şile",
+    "Şişli",
+    "Tuzla",
+    "Ümraniye",
+    "Üsküdar",
+    "Zeytinburnu"
   ];
 
   final List<String> _kocaeliDistricts = [
-    "İzmit", "Derince", "Körfez", "Gebze", "Gölcük", "Karamürsel", "Kandıra", "Başiskele", "Kartepe", "Çayırova", "Darıca", "Dilovası"
+    "İzmit",
+    "Derince",
+    "Körfez",
+    "Gebze",
+    "Gölcük",
+    "Karamürsel",
+    "Kandıra",
+    "Başiskele",
+    "Kartepe",
+    "Çayırova",
+    "Darıca",
+    "Dilovası"
   ];
 
   String? getCurrentUserId() {
     return FirebaseAuth.instance.currentUser?.uid;
   }
 
-  final TextStyle _textStyle =GoogleFonts.inter(
-      fontSize: 16.sp,
-      fontWeight: FontWeight.w400
-  );
+  final TextStyle _textStyle =
+      GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w400);
 
   final TextStyle _headerTextStyle = GoogleFonts.inter(
-      fontSize: 18.sp,
-      color: Colors.black,
-      fontWeight: FontWeight.w700
-  );
+      fontSize: 18.sp, color: Colors.black, fontWeight: FontWeight.w700);
 
   @override
   Widget build(BuildContext context) {
@@ -63,13 +107,20 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           borderRadius: BorderRadius.circular(20.r),
         ),
         width: double.infinity,
-        height: _pageController.hasClients && _pageController.page == 2 ? 450.h : 400.h,
+        height: _pageController.hasClients && _pageController.page == 2
+            ? 450.h
+            : 400.h,
         padding: const EdgeInsets.all(16.0),
         child: PageView(
           controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture
+          physics: const BouncingScrollPhysics(),
+          // Disable swipe gesture
           children: [
-            _buildPage(widget.pageName == "Ev Temizliği" ? _buildFirstPage() : _buildFirstPageOfis()),
+            SingleChildScrollView(
+              child: _buildPage(widget.pageName == "Ev Temizliği"
+                  ? _buildFirstPage()
+                  : _buildFirstPageOfis()),
+            ),
             //_buildPage(_buildSecondPage()),
             _buildPage(_buildThirdPage()),
             _buildPage(_buildFourthPage()),
@@ -119,83 +170,95 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        SizedBox(height: 30.h),
         Text("Ofis Kaç m²", style: _headerTextStyle),
-        const SizedBox(height: 20),
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: DataBaseOperations().fetchProducts(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Hata ile karşılaşıldı: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Hizmet Bulunamadı'));
-            } else {
-              // Filter out products with empty room_count
-              List<Map<String, dynamic>> filteredProducts = snapshot.data!.where((product) {
-                return product['product_area'].isNotEmpty;
-              }).toList();
+        SizedBox(height: 20.h),
+        Container(
+          height: 210.h,
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: DataBaseOperations().fetchProducts(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(
+                    child: Text('Hata ile karşılaşıldı: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('Hizmet Bulunamadı'));
+              } else {
+                // Filter out products with empty room_count
+                List<Map<String, dynamic>> filteredProducts =
+                    snapshot.data!.where((product) {
+                  return product['product_area'].isNotEmpty;
+                }).toList();
 
-              // Sort products based on the first digit of room_count in descending order
-              filteredProducts.sort((a, b) {
-                int roomCountA = int.tryParse(a['product_area'][0]) ?? 0;
-                int roomCountB = int.tryParse(b['product_area'][0]) ?? 0;
-                return roomCountB.compareTo(roomCountA);
-              });
+                // Sort products based on the first digit of room_count in descending order
+                filteredProducts.sort((a, b) {
+                  int roomCountA = int.tryParse(a['product_area'][0]) ?? 0;
+                  int roomCountB = int.tryParse(b['product_area'][0]) ?? 0;
+                  return roomCountB.compareTo(roomCountA);
+                });
 
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: filteredProducts.length,
-                itemBuilder: (context, index) {
-                  Product product = Product.fromMap(filteredProducts[index]);
-                  return _buildOptionButton(
-                    '${product.product_area} m²' ?? 'Unknown', // Provide a default value
-                    index,
-                    _selectedRoomIndex,
-                        (index) {
-                      setState(() {
-                        _selectedRoomIndex = index;
-                        _minimumFee = int.parse(product.price);
-                      });
-                    },
-                  );
-                },
-              );
-            }
-          },
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: filteredProducts.length,
+                  itemBuilder: (context, index) {
+                    Product product = Product.fromMap(filteredProducts[index]);
+                    return _buildOptionButton(
+                      '${product.product_area} m²' ?? 'Unknown',
+                      // Provide a default value
+                      product.product_area!,
+                      _selectedRoom,
+                      (value) {
+                        setState(() {
+                          _selectedRoom = value;
+                          _minimumFee = int.parse(product.price);
+                        });
+                      },
+                    );
+                  },
+                );
+              }
+            },
+          ),
         ),
         SizedBox(height: 10.h),
         ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+            backgroundColor: WidgetStatePropertyAll<Color>(
+                Color(0xFFD1461E).withOpacity(0.9)),
           ),
           onPressed: () {
-            if (_selectedRoomIndex != -1) {
+            if (_selectedRoom != null) {
               _pageController.nextPage(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeIn,
               );
             }
           },
-          child: Text("Devam", style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          ) ,),
+          child: Text(
+            "Devam",
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildFirstPage() {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 30.h),
-          Text("Evin Oda sayısı kaç", style: _headerTextStyle),
-          const SizedBox(height: 20),
-          FutureBuilder<List<Map<String, dynamic>>>(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(height: 30.h),
+        Text("Evin Oda sayısı kaç", style: _headerTextStyle),
+        const SizedBox(height: 20),
+        Container(
+          height: 210.h, // Set the desired height
+          child: FutureBuilder<List<Map<String, dynamic>>>(
             future: DataBaseOperations().fetchProducts(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -218,17 +281,17 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                 });
 
                 return ListView.builder(
-                  shrinkWrap: true,
+                  shrinkWrap: false,
                   itemCount: filteredProducts.length,
                   itemBuilder: (context, index) {
                     Product product = Product.fromMap(filteredProducts[index]);
                     return _buildOptionButton(
                       product.room_count ?? 'Unknown', // Provide a default value
-                      index,
-                      _selectedRoomIndex,
-                          (index) {
+                      product.room_count!,
+                      _selectedRoom,
+                          (value) {
                         setState(() {
-                          _selectedRoomIndex = index;
+                          _selectedRoom = value;
                           _minimumFee = int.parse(product.price);
                         });
                       },
@@ -238,27 +301,28 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               }
             },
           ),
-          SizedBox(height: 10.h),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
-            ),
-            onPressed: () {
-              if (_selectedRoomIndex != -1) {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeIn,
-                );
-              }
-            },
-            child: Text("Devam", style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
-            )),
+        ),
+        SizedBox(height: 10.h),
+        ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
           ),
-        ],
-      ),
+          onPressed: () {
+            if (_selectedRoom != null) {
+              _pageController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeIn,
+              );
+            }
+          },
+          child: Text("Devam",
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              )),
+        ),
+      ],
     );
   }
 
@@ -268,48 +332,52 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       children: [
         Text("Kaç saat temizlik yapılacak", style: _headerTextStyle),
         const SizedBox(height: 20),
-        _buildOptionButton("3 saat", 0, _selectedCleaningIndex, (index) {
+        _buildOptionButton("3 saat", "3 saat", _selectedCleaningTime, (value) {
           setState(() {
-            _selectedCleaningIndex = index;
-            _minimumFee = (_selectedRoomIndex == 0 ? 800 : 1700) + 350;
+            _selectedCleaningTime = value;
+            _minimumFee += 350;
           });
         }),
-        _buildOptionButton("4 saat", 1, _selectedCleaningIndex, (index) {
+        _buildOptionButton("4 saat", "4 saat", _selectedCleaningTime, (value) {
           setState(() {
-            _selectedCleaningIndex = index;
-            _minimumFee = (_selectedRoomIndex == 0 ? 800 : 1700) + 450;
+            _selectedCleaningTime = value;
+            _minimumFee += 450;
           });
         }),
-        _buildOptionButton("5 saat", 2, _selectedCleaningIndex, (index) {
+        _buildOptionButton("5 saat", "5 saat", _selectedCleaningTime, (value) {
           setState(() {
-            _selectedCleaningIndex = index;
-            _minimumFee = (_selectedRoomIndex == 0 ? 800 : 1700) + 700;
+            _selectedCleaningTime = value;
+            _minimumFee += 700;
           });
         }),
-        _buildOptionButton("6 saat ve üzeri", 3, _selectedCleaningIndex, (index) {
+        _buildOptionButton(
+            "6 saat ve üzeri", "6 saat ve üzeri", _selectedCleaningTime,
+            (value) {
           setState(() {
-            _selectedCleaningIndex = index;
-            _minimumFee = (_selectedRoomIndex == 0 ? 800 : 1700) + 800;
+            _selectedCleaningTime = value;
+            _minimumFee += 800;
           });
         }),
         SizedBox(height: 10.h),
         ElevatedButton(
           style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+            backgroundColor: WidgetStatePropertyAll<Color>(
+                Color(0xFFD1461E).withOpacity(0.9)),
           ),
           onPressed: () {
-            if (_selectedCleaningIndex != -1) {
+            if (_selectedCleaningTime != null) {
               _pageController.nextPage(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeIn,
               );
             }
           },
-          child: Text("Devam",style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          )),
+          child: Text("Devam",
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              )),
         ),
       ],
     );
@@ -324,15 +392,15 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           children: [
             Text("Şehir seçiniz", style: _headerTextStyle),
             const SizedBox(height: 20),
-            _buildOptionButton("İstanbul", 0, _selectedCity == "İstanbul" ? 0 : -1, (index) {
+            _buildOptionButton("İstanbul", "İstanbul", _selectedCity, (value) {
               setState(() {
-                _selectedCity = "İstanbul";
+                _selectedCity = value;
                 _selectedDistrict = null;
               });
             }),
-            _buildOptionButton("Kocaeli", 1, _selectedCity == "Kocaeli" ? 1 : -1, (index) {
+            _buildOptionButton("Kocaeli", "Kocaeli", _selectedCity, (value) {
               setState(() {
-                _selectedCity = "Kocaeli";
+                _selectedCity = value;
                 _selectedDistrict = null;
               });
             }),
@@ -343,11 +411,13 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
               DropdownButton<String>(
                 value: _selectedDistrict,
                 menuMaxHeight: 100.h,
-                items: (_selectedCity == "İstanbul" ? _istanbulDistricts : _kocaeliDistricts)
+                items: (_selectedCity == "İstanbul"
+                        ? _istanbulDistricts
+                        : _kocaeliDistricts)
                     .map((district) => DropdownMenuItem(
-                  value: district,
-                  child: Text(district),
-                ))
+                          value: district,
+                          child: Text(district),
+                        ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -372,8 +442,8 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             TextField(
               decoration: const InputDecoration(
                 labelText: "Telefon",
+                hintText: "05XXXXXXXXX",
                 border: OutlineInputBorder(),
-
               ),
               keyboardType: TextInputType.phone,
               onChanged: (value) {
@@ -385,27 +455,39 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             SizedBox(height: 10.h),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll<Color>(Color(0xFFD1461E).withOpacity(0.9)),
+                backgroundColor: WidgetStatePropertyAll<Color>(
+                    Color(0xFFD1461E).withOpacity(0.9)),
               ),
               onPressed: () {
-                if (_selectedCity != null && _selectedDistrict != null && _address.isNotEmpty && _phoneNumber.isNotEmpty) {
+                if (_selectedCity != null &&
+                    _selectedDistrict != null &&
+                    _address.isNotEmpty &&
+                    _phoneNumber.length == 11) {
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeIn,
                   );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text('Lütfen tüm alanları doğru şekilde doldurun')),
+                  );
                 }
               },
-              child: Text("Devam",style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: Colors.white,
-              )),
+              child: Text("Devam",
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                  )),
             ),
           ],
         ),
       ),
     );
   }
+
   bool _isLoading = false;
 
   Widget _buildFourthPage() {
@@ -415,111 +497,123 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
 
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(height: 50.h),
           Text("Seçtiğiniz Bilgiler", style: _headerTextStyle),
           const SizedBox(height: 20),
           Text("Şehir: $_selectedCity", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
-          Text("İlçe: $_selectedDistrict", style: const TextStyle(fontSize: 18)),
+          Text("İlçe: $_selectedDistrict",
+              style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           Text("Adres: $_address", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           Text("Telefon: $_phoneNumber", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           widget.pageName == "Ev Temizliği"
-              ? Text("Oda Sayısı: ${_selectedRoomIndex + 1}", style: const TextStyle(fontSize: 18))
-              : Text("Temizlenecek Alan: ${_selectedRoomIndex == 0 ? '50 m²' : _selectedRoomIndex == 1 ? '100 m²' : _selectedRoomIndex == 2 ? '150 m²' : '150 m² üstü'}", style: const TextStyle(fontSize: 18)),
+              ? Text("Oda Sayısı: $_selectedRoom",
+                  style: const TextStyle(
+                      fontSize: 18)) // Display the selected room count
+              : Text("Temizlenecek Alan: $_selectedRoom",
+                  style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
-          Text("Min. Ödeme Tutarı: $_minimumFee TL", style: const TextStyle(fontSize: 18)),
+          Text("Min. Ödeme Tutarı: $_minimumFee TL",
+              style: const TextStyle(fontSize: 18)),
           SizedBox(height: 10.h),
           _isLoading
               ? CircularProgressIndicator()
               : ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFD1461E).withOpacity(0.9)),
-            ),
-            onPressed: () async {
-              setState(() {
-                _isLoading = true;
-              });
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Color(0xFFD1461E).withOpacity(0.9)),
+                  ),
+                  onPressed: () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
 
-              try {
-                String merchantOid = DateTime.now().millisecondsSinceEpoch.toString();
-                String? token = await PaymentService().startPayment(
-                  amount: _minimumFee.toDouble(),
-                  email: _email,
-                  name: _name,
-                  address: _address,
-                  phone: _phoneNumber,
-                  merchantOid: merchantOid,
-                );
-
-                if (token != null) {
-                  String paymentUrl = "https://www.paytr.com/odeme/guvenli/$token";
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PaymentScreen(
-                        paymentUrl: paymentUrl,
-                        name: _name,
+                    try {
+                      String merchantOid =
+                          DateTime.now().millisecondsSinceEpoch.toString();
+                      String? token = await PaymentService().startPayment(
+                        amount: _minimumFee.toDouble(),
                         email: _email,
-                        city: _selectedCity!,
-                        district: _selectedDistrict!,
+                        name: _name,
                         address: _address,
                         phone: _phoneNumber,
-                        fee: _minimumFee,
-                        roomIndex: _selectedRoomIndex,
-                        cleaningIndex: _selectedCleaningIndex,
-                        cleaningPlace: widget.pageName,
-                      ),
-                    ),
-                  );
-                }
-              } catch (e) {
-                print("hata : ${e.toString()}");
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Ödeme işlemi başarısız oldu: $e')),
-                );
-              }
+                        merchantOid: merchantOid,
+                      );
 
-              setState(() {
-                _isLoading = false;
-              });
-            },
-            child: Text("Ödeme Sayfasına Git", style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
-            )),
-          ),
+                      if (token != null) {
+                        String paymentUrl =
+                            "https://www.paytr.com/odeme/guvenli/$token";
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentScreen(
+                              paymentUrl: paymentUrl,
+                              name: _name,
+                              email: _email,
+                              city: _selectedCity!,
+                              district: _selectedDistrict!,
+                              address: _address,
+                              phone: _phoneNumber,
+                              fee: _minimumFee,
+                              roomCountOrArea: _selectedRoom!,
+                              //cleaningIndex: _selectedCleaningTime,
+                              cleaningPlace: widget.pageName,
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      print("hata : ${e.toString()}");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Ödeme işlemi başarısız oldu: $e')),
+                      );
+                    }
+
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  },
+                  child: Text("Ödeme Sayfasına Git",
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                      )),
+                ),
         ],
       ),
     );
   }
 
-
-  Widget _buildOptionButton(String text, int index, int selectedIndex, Function(int) onTap) {
+  Widget _buildOptionButton(String text, String value, String? selectedValue,
+      Function(String) onTap) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: GestureDetector(
-        onTap: () => onTap(index),
+        onTap: () => onTap(value),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: selectedIndex == index ? const Color(0xFFD1461E).withOpacity(0.9) : Colors.grey.shade300,
+            color: selectedValue == value
+                ? const Color(0xFFD1461E).withOpacity(0.9)
+                : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  color: selectedIndex == index ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.w400
-              )
+            text,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: selectedValue == value ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ),

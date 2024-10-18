@@ -18,8 +18,8 @@ class PaymentScreen extends StatefulWidget {
   final String address;
   final String phone;
   final int fee;
-  final int roomIndex;
-  final int cleaningIndex;
+  final String roomCountOrArea;
+  //final int cleaningIndex;
   final String cleaningPlace;
 
   PaymentScreen({
@@ -31,8 +31,8 @@ class PaymentScreen extends StatefulWidget {
     required this.address,
     required this.phone,
     required this.fee,
-    required this.roomIndex,
-    required this.cleaningIndex,
+    required this.roomCountOrArea,
+   // required this.cleaningIndex,
     required this.cleaningPlace,
   });
 
@@ -74,8 +74,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         fee: widget.fee,
         timestamp: DateTime.now(),
         cleaningPlace: widget.cleaningPlace,
-        numberOfRoomsOrArea: "${widget.roomIndex + 1}",
-        cleaningTime: widget.cleaningIndex + 3,
+        numberOfRoomsOrArea: "${widget.roomCountOrArea}",
+       // cleaningTime: widget.cleaningIndex + 3,
         status: 'Yapılmadı',
       );
 
@@ -133,7 +133,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Text("Telefon: ${widget.phone}", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text("Ödeme: ${widget.fee} TL", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text("Hizmet Türü: ${widget.cleaningPlace}", style: GoogleFonts.inter(fontSize: 16.sp)),
-                      Text("Temizlik Süresi: ${widget.cleaningIndex + 3} Saat", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text(widget.cleaningPlace == 'Ev Temizliği'?
+                          "Oda Sayısı: ${widget.roomCountOrArea}" :
+                          'Temizlik Alanı: ${widget.roomCountOrArea} m²'
+                          , style: GoogleFonts.inter(fontSize: 16.sp)),
+                   //   Text("Temizlik Süresi: ${widget.cleaningIndex + 3} Saat", style: GoogleFonts.inter(fontSize: 16.sp)),
                     ],
                   ),
                 ),

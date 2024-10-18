@@ -37,6 +37,7 @@ class AuthService {
         'docID': docID, // Add docID to the Firestore document
         'createdAt': FieldValue.serverTimestamp(),
         "isAdmin": false,
+        
       });
 
       _showErrorDialog(context, "Bilgi", "Kayıt başarılı, doğrulama e-postası gönderildi.", () {
@@ -77,42 +78,60 @@ class AuthService {
     required BuildContext context,
   }) async {
     try {
+      // Firebase ile kullanıcı girişi yapılıyor
       UserCredential _user = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (_user.user!.uid.isNotEmpty) {
+      // Kullanıcı objesi null değil ve UID dolu ise
+      if (_user.user != null && _user.user!.uid.isNotEmpty) {
+
+        // Eğer e-posta doğrulanmışsa
         if (_user.user!.emailVerified == true) {
 
-          // Kullanıcı ID'sini cihazda saklama
+          // Hive ile kullanıcı bilgilerini cihazda saklama
           var box = Hive.box('userBox');
           box.put('userId', _user.user!.uid);
-
-          // Kullanıcı adını cihazda saklama
           box.put('userEmail', email);
 
-          // Kullanıcı adını cihazda saklama
+          // Firestore'dan kullanıcı bilgilerini çekme
           DocumentSnapshot userDoc = await _firestore.collection('users').doc(_user.user!.uid).get();
-          String userName = userDoc['name'];
-          bool isAdmin = userDoc['isAdmin'];
-          box.put('userName', userName);
-          box.put('isAdmin', isAdmin);
-          print("isAdmin : ${box.get('isAdmin')}");
 
-          if(isAdmin == true){
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (BuildContext context) => const AdminView()),
-            );
-          }
-          else{
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
-            );
+          if (userDoc.exists) {
+            // Firestore'dan dönen veriyi Map<String, dynamic> olarak döndürüyoruz
+            Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+
+            // Null kontrolü yapıyoruz, eğer userData null değilse verileri alıyoruz
+            if (userData != null) {
+              String userName = userData['name'] ?? 'Anonim'; // Eğer null ise 'Anonim' kullan
+              bool isAdmin = userData['isAdmin'] ?? false; // Eğer null ise false kullan
+              box.put('userName', userName);
+              box.put('isAdmin', isAdmin);
+
+              print("isAdmin : ${box.get('isAdmin')}");
+
+              // Yönlendirme işlemleri
+              if (isAdmin == true) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => const AdminView()),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+                );
+              }
+            } else {
+              print("Kullanıcı dökümanı bulunamadı.");
+              _showErrorDialog(context, "Hata", "Kullanıcı bilgileri alınamadı.", () {
+                Navigator.of(context).pop();
+              });
+            }
           }
         } else {
+          // E-posta doğrulanmamışsa doğrulama e-postası gönder
           await _user.user!.sendEmailVerification();
           _showErrorDialog(context, "Bilgi", 'E-posta doğrulaması gerekiyor. Lütfen e-postanızı kontrol edin.', () {
             Navigator.of(context).pop();
@@ -125,9 +144,9 @@ class AuthService {
         message = 'Kullanıcı bulunamadı.';
       } else if (e.code == 'wrong-password') {
         message = 'Yanlış şifre.';
-      }else if(e.code == 'invalid-email'){
+      } else if (e.code == 'invalid-email') {
         message = 'Geçersiz e-posta adresi.';
-      }else if(e.code == 'invalid-credential'){
+      } else if (e.code == 'invalid-credential') {
         message = 'e-posta adresi veya şifre hatalı.';
       } else {
         print("hata : ${e.code}");
@@ -138,11 +157,13 @@ class AuthService {
         Navigator.of(context).pop();
       });
     } catch (e) {
+      // Bilinmeyen hatalar için genel catch bloğu
       _showErrorDialog(context, "Hata", 'Bilinmeyen bir hata oluştu.', () {
         Navigator.of(context).pop();
       });
     }
   }
+
 
   Future<void> signInWithGoogle(BuildContext context) async {
     try {

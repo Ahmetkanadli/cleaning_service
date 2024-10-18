@@ -1,4 +1,5 @@
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/services/whatsapp%20service/whatsapp_service.dart';
 import 'package:clean_app/view/adminView/price_update.dart';
 import 'package:clean_app/view/login/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,6 +49,10 @@ class _AdminViewState extends State<AdminView> {
         filteredServices = allPastServices.where((service) => service['status'] == 'Tamamlandı').toList();
       } else if (type == 'not_done') {
         filteredServices = allPastServices.where((service) => service['status'] == 'Yapılmadı').toList();
+      }else if (type == 'ekip_yolda') {
+        filteredServices =
+            allPastServices.where((service) => service['status'] ==
+                'Ekip yolda').toList();
       } else {
         filteredServices = allPastServices;
       }
@@ -62,6 +67,8 @@ class _AdminViewState extends State<AdminView> {
         return 'Yapılmayanlar';
       case 'date':
         return 'Tarihe Göre';
+      case 'ekip_yolda':
+        return 'Ekip yolda';
       default:
         return 'Tümü';
     }
@@ -101,7 +108,9 @@ class _AdminViewState extends State<AdminView> {
     setState(() {
       filteredServices = allPastServices.where((service) {
         DateTime serviceDate = (service['timestamp'] as Timestamp).toDate();
-        return serviceDate.month == selectedDate.month && serviceDate.year == selectedDate.year;
+        return serviceDate.year == selectedDate.year &&
+            serviceDate.month == selectedDate.month &&
+            serviceDate.day == selectedDate.day;
       }).toList();
       selectedFilter = 'Tarihe Göre';
     });
@@ -221,6 +230,20 @@ class _AdminViewState extends State<AdminView> {
                 ],
               ),
               actions: [
+                GestureDetector(
+                  onTap: () {
+                    WhatsappService().launchWhatsApp(service['phone']);
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
+                    child: Image.asset(
+                      "assets/images/whatsapp.png",
+                      height: 30,
+                      width: 30,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -446,7 +469,7 @@ class _AdminViewState extends State<AdminView> {
                   value: filterType,
                   icon: const Icon(Icons.filter_list, color: Colors.black),
                   dropdownColor: const Color(0xFFD1461E),
-                  items: <String>['all', 'done', 'not_done', 'date']
+                  items: <String>['all', 'done', 'not_done', 'date','ekip_yolda']
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -501,7 +524,7 @@ class _AdminViewState extends State<AdminView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Müşteri: ${service['userName']} ${index}",
+                                  "Müşteri: ${service['userName']}",
                                   style: GoogleFonts.inter(
                                     fontSize: 16.sp,
                                     color: Colors.black,

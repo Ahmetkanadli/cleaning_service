@@ -90,13 +90,6 @@ class _PastServicesState extends State<PastServices> {
                     fontWeight: FontWeight.w400
                 ),
               ),
-              Text("Temizlik Süresi: ${service['cleaningTime']} hours",
-                style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400
-                ),
-              ),
               Text("Tarih: ${DateFormat('dd/MM/yyyy HH:mm').format((service['timestamp'] as Timestamp).toDate())}",
                 style: GoogleFonts.inter(
                     fontSize: 16.sp,

@@ -10,10 +10,10 @@ class PaymentService {
   late String merchantSalt;
 
   PaymentService() {
-    _initializeRemoteConfig();
+    initializeRemoteConfig();
   }
 
-  Future<void> _initializeRemoteConfig() async {
+  Future<void> initializeRemoteConfig() async {
     await Firebase.initializeApp();
     final remoteConfig = FirebaseRemoteConfig.instance;
 

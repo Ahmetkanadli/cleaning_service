@@ -11,7 +11,7 @@ class ServiceModel {
   final DateTime timestamp;
   final String cleaningPlace;
   final String numberOfRoomsOrArea;
-  final int cleaningTime;
+  //final int cleaningTime;
   final String status;
 
   ServiceModel({
@@ -24,7 +24,7 @@ class ServiceModel {
     required this.timestamp,
     required this.cleaningPlace,
     required this.numberOfRoomsOrArea,
-    required this.cleaningTime,
+   // required this.cleaningTime,
     required this.status,
   });
 
@@ -39,7 +39,7 @@ class ServiceModel {
       'timestamp': timestamp,
       'cleaningPlace': cleaningPlace,
       'numberOfRoomsOrArea': numberOfRoomsOrArea,
-      'cleaningTime': cleaningTime,
+     // 'cleaningTime': cleaningTime,
       'status': status,
     };
   }
@@ -55,7 +55,7 @@ class ServiceModel {
       timestamp: (map['timestamp'] as Timestamp).toDate(),
       cleaningPlace: map['cleaningPlace'],
       numberOfRoomsOrArea: map['numberOfRoomsOrArea'],
-      cleaningTime: map['cleaningTime'],
+    //  cleaningTime: map['cleaningTime'],
       status: map['status'], // Add status from map
     );
   }

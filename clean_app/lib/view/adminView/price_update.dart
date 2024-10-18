@@ -94,7 +94,6 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -114,49 +113,70 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-            final product = products[index];
-            return Card(
-              color: Colors.white,
-              elevation: 10,
-              child: ListTile(
-                title: Text(
-                  product['room_count']!= null ?
-                  'Oda Sayısı ${product['room_count'] }' :
-                  'Temizlik Alanı ${product['product_area']} m²' ?? 'Unknown',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  '${product['price'] ?? '0'} TL',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () => _showUpdateDialog(product),
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            if (products.any((product) => product['room_count'] != null))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      color: Color(0xFFD1461E),
+                      child: Container(
+                        width: double.infinity,
+                        height: 30.h,
+                        child: Text(
+                          'Ev Temizliği Fiyatları',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white
+                          ),
+                        ),
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () => _deletePrice(product['id']),
-                    ),
-                  ],
-                ),
+                  ),
+                  ...products
+                      .where((product) => product['room_count'] != null)
+                      .map((product) => _buildProductCard(product))
+                      .toList(),
+                ],
               ),
-            );
-                    },
+            if (products.any((product) => product['product_area'] != null))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      color: Color(0xFFD1461E),
+                      child: Container(
+                        width: double.infinity,
+                        height: 30.h,
+                        child: Text(
+                          'Ofis Temizliği Fiyatları',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-          ),
+                  ...products
+                      .where((product) => product['product_area'] != null)
+                      .map((product) => _buildProductCard(product))
+                      .toList(),
+                ],
+              ),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddDialog(),
         label: Row(
@@ -174,6 +194,44 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
           ],
         ),
         backgroundColor: Color(0xFFD1461E),
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Map<String, dynamic> product) {
+    return Card(
+      color: Colors.white,
+      elevation: 10,
+      child: ListTile(
+        title: Text(
+          product['room_count'] != null
+              ? 'Oda Sayısı ${product['room_count']}'
+              : 'Temizlik Alanı ${product['product_area']} m²',
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          'Ücret :${product['price'] ?? '0'} TL',
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () => _showUpdateDialog(product),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () => _deletePrice(product['id']),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -217,72 +275,75 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
     TextEditingController roomCountController = TextEditingController();
     TextEditingController productAreaController = TextEditingController();
     TextEditingController priceController = TextEditingController();
+    String? cleaningType;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('Teklif Ekle'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Uyarı : Tek seferde yalnız Oda Sayısı veya Temizlik alanı Doldurulabilir.",
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.red,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text('Teklif Ekle'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(labelText: 'Temizlik Türü'),
+                    items: [
+                      DropdownMenuItem(value: 'Ev Temizliği', child: Text('Ev Temizliği')),
+                      DropdownMenuItem(value: 'Ofis Temizliği', child: Text('Ofis Temizliği')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        cleaningType = value;
+                        roomCountController.clear();
+                        productAreaController.clear();
+                      });
+                    },
+                  ),
+                  if (cleaningType == 'Ev Temizliği')
+                    TextField(
+                      controller: roomCountController,
+                      decoration: InputDecoration(labelText: 'Oda Sayısı'),
+                    ),
+                  if (cleaningType == 'Ofis Temizliği')
+                    TextField(
+                      controller: productAreaController,
+                      decoration: InputDecoration(labelText: 'Temizlik Alanı (m²)'),
+                    ),
+                  TextField(
+                    controller: priceController,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(labelText: 'Ücret'),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-              ),
-              TextField(
-                controller: roomCountController,
-                decoration: InputDecoration(labelText: 'Oda Sayısı'),
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                    productAreaController.clear();
-                  }
-                },
-              ),
-              TextField(
-                controller: productAreaController,
-                decoration: InputDecoration(labelText: 'Temizlik Alanı (m²)'),
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                    roomCountController.clear();
-                  }
-                },
-              ),
-              TextField(
-                controller: priceController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: 'Ücret'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Add'),
-              onPressed: () {
-                String? roomCount = roomCountController.text.isNotEmpty ? roomCountController.text : null;
-                String? productArea = productAreaController.text.isNotEmpty ? productAreaController.text : null;
-                String price = priceController.text;
+                TextButton(
+                  child: Text('Add'),
+                  onPressed: () {
+                    String? roomCount = roomCountController.text.isNotEmpty ? roomCountController.text : null;
+                    String? productArea = productAreaController.text.isNotEmpty ? productAreaController.text : null;
+                    String price = priceController.text;
 
-                if ((roomCount != null || productArea != null) && price.isNotEmpty) {
-                  _addPrice(roomCount ?? '', productArea ?? '', price);
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Lütfen gerekli tüm alanları doldurun')),
-                  );
-                }
-              },
-            ),
-          ],
+                    if ((roomCount != null || productArea != null) && price.isNotEmpty) {
+                      _addPrice(roomCount ?? '', productArea ?? '', price);
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lütfen gerekli tüm alanları doldurun')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );

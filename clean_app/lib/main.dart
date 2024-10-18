@@ -1,3 +1,4 @@
+import 'package:clean_app/services/payment_service.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
 
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
