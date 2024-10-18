@@ -49,10 +49,15 @@ class _AdminViewState extends State<AdminView> {
         filteredServices = allPastServices.where((service) => service['status'] == 'Tamamlandı').toList();
       } else if (type == 'not_done') {
         filteredServices = allPastServices.where((service) => service['status'] == 'Yapılmadı').toList();
+<<<<<<< Updated upstream
       }else if (type == 'ekip_yolda') {
         filteredServices =
             allPastServices.where((service) => service['status'] ==
                 'Ekip yolda').toList();
+=======
+      } else if (type == 'ekip_yolda') {
+        filteredServices = allPastServices.where((service) => service['status'] == 'Ekip Yolda').toList();
+>>>>>>> Stashed changes
       } else {
         filteredServices = allPastServices;
       }
@@ -65,6 +70,8 @@ class _AdminViewState extends State<AdminView> {
         return 'Yapılanlar';
       case 'not_done':
         return 'Yapılmayanlar';
+      case 'ekip_yolda':
+        return 'Ekip Yolda';
       case 'date':
         return 'Tarihe Göre';
       case 'ekip_yolda':
@@ -469,7 +476,11 @@ class _AdminViewState extends State<AdminView> {
                   value: filterType,
                   icon: const Icon(Icons.filter_list, color: Colors.black),
                   dropdownColor: const Color(0xFFD1461E),
+<<<<<<< Updated upstream
                   items: <String>['all', 'done', 'not_done', 'date','ekip_yolda']
+=======
+                  items: <String>['all', 'done', 'not_done', 'ekip_yolda', 'date']
+>>>>>>> Stashed changes
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
