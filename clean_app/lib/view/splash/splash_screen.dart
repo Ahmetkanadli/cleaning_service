@@ -1,4 +1,5 @@
 
+import 'package:clean_app/view/adminView/adminPanel/admin_panel.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/login/login_page.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
@@ -29,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (userId != null) {
         if (isAdmin == true) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const AdminView()),
+            MaterialPageRoute(builder: (context) =>  AdminPanel()),
           );
         } else {
           Navigator.of(context).pushReplacement(

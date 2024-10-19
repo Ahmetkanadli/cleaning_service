@@ -92,6 +92,11 @@ flutter:
     - assets/images/
     - assets/splash.png
     - assets/animations/
+    - assets/animations/gain.json
+    - assets/animations/customer.json
+    - assets/animations/not_done.json
+    - assets/animations/done.json
+    - assets/animations/on_way.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

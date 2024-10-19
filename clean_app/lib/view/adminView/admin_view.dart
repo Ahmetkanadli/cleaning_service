@@ -36,6 +36,11 @@ class _AdminViewState extends State<AdminView> {
 
   Future<void> _fetchServices() async {
     List<Map<String, dynamic>> services = await _dbOperations.getAllUsersPastServices();
+    services.sort((a, b) {
+      DateTime dateA = (a['timestamp'] as Timestamp).toDate();
+      DateTime dateB = (b['timestamp'] as Timestamp).toDate();
+      return dateB.compareTo(dateA);
+    });
     setState(() {
       allPastServices = services;
       filteredServices = services;

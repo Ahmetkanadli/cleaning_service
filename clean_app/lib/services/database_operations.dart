@@ -6,6 +6,68 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class DataBaseOperations{
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Future<Map<String, dynamic>> fetchAdminPanelData() async {
+    try {
+      QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
+      int customerCount = usersSnapshot.size;
+
+      int doneOrders = 0;
+      int notDoneOrders = 0;
+      int onTheWayOrders = 0;
+      double monthlyRevenue = 0;
+      double yearlyRevenue = 0;
+
+      DateTime now = DateTime.now();
+      DateTime startOfMonth = DateTime(now.year, now.month, 1);
+      DateTime startOfYear = DateTime(now.year, 1, 1);
+
+      for (var userDoc in usersSnapshot.docs) {
+        QuerySnapshot servicesSnapshot = await userDoc.reference
+            .collection('past_services')
+            .get();
+
+        for (var serviceDoc in servicesSnapshot.docs) {
+          Map<String, dynamic>? serviceData = serviceDoc.data() as Map<String, dynamic>?;
+
+          if (serviceData != null) {
+            Timestamp? timestamp = serviceData['timestamp'] as Timestamp?;
+            if (timestamp != null) {
+              DateTime dateTime = timestamp.toDate();
+              double fee = serviceData['fee'];
+
+              if (serviceData['status'] == 'Tamamlandı') {
+                doneOrders++;
+              } else if (serviceData['status'] == 'Yapılmadı') {
+                notDoneOrders++;
+              } else if (serviceData['status'] == 'Ekip yolda') {
+                onTheWayOrders++;
+              }
+
+              if (dateTime.isAfter(startOfMonth)) {
+                monthlyRevenue += fee;
+              }
+
+              if (dateTime.isAfter(startOfYear)) {
+                yearlyRevenue += fee;
+              }
+            }
+          }
+        }
+      }
+
+      return {
+        'customerCount': customerCount,
+        'doneOrders': doneOrders,
+        'notDoneOrders': notDoneOrders,
+        'onTheWayOrders': onTheWayOrders,
+        'monthlyRevenue': monthlyRevenue,
+        'yearlyRevenue': yearlyRevenue,
+      };
+    } catch (e) {
+      print("Error fetching admin panel data: $e");
+      return {};
+    }
+  }
 
   Future<String> getUserName() {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
@@ -265,5 +327,14 @@ class DataBaseOperations{
     }
     return [];
   }
-
+  Future<int> fetchCustomerCount() async {
+    try {
+      final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+      QuerySnapshot usersSnapshot = await _firestore.collection('users').get();
+      return usersSnapshot.size;
+    } catch (e) {
+      print("Error fetching customer count: $e");
+      return 0;
+    }
+  }
 }

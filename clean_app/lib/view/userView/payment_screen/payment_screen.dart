@@ -91,6 +91,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       QuerySnapshot adminSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('isAdmin', isEqualTo: true)
+          .where('isAdmin', isNotEqualTo: false) // isAdmin false olanları dışla
           .get();
       
       // Her admin için bildirim gönder
