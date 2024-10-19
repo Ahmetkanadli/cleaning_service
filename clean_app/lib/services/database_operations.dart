@@ -1,5 +1,6 @@
 import 'package:clean_app/models/product.dart';
 import 'package:clean_app/models/service_model.dart';
+import 'package:clean_app/services/notificationService/notification_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -45,6 +46,25 @@ class DataBaseOperations{
     } catch (e) {
       print("Error getting past services: $e");
       return [];
+    }
+  }
+
+  Future<void> updateUserProfile(String userId, String name, {String? newPassword}) async {
+    try {
+      Map<String, dynamic> updateData = {'name': name};
+      
+      await _firestore.collection('users').doc(userId).update(updateData);
+      
+      if (newPassword != null && newPassword.isNotEmpty) {
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await user.updatePassword(newPassword);
+        }
+      }
+      
+      print("Kullanıcı profili başarıyla güncellendi.");
+    } catch (e) {
+      print("Kullanıcı profili güncellenirken hata oluştu: $e");
     }
   }
 
@@ -135,6 +155,23 @@ class DataBaseOperations{
             pastServices[index]['status'] = newStatus;    
             await servicesRef.update({'services': pastServices});
             print("Sipariş durumu başarıyla güncellendi.");
+            
+            if (newStatus == 'Ekip yolda') {
+              // Bildirim gönderme işlemi
+              NotificationService notificationService = NotificationService();
+              DocumentSnapshot userSnapshot = await _firestore.collection('users').doc(userId).get();
+              String? fcmToken = userSnapshot.get('fcmToken');
+              if (fcmToken != null) {
+                await notificationService.sendNotification(
+                  to: 'admin',
+                  title: 'Sipariş Durumu Güncellendi',
+                  body: 'Ekibimiz yola çıktı! Yakında hizmet noktanızda olacağız.',
+                  fcmToken: fcmToken,
+                );
+              } else {
+                print("Kullanıcının FCM token'ı bulunamadı.");
+              }
+            }
           } else {
             print("Hata: Belirtilen merchantOid ile eşleşen sipariş bulunamadı.");
           }
@@ -156,7 +193,7 @@ class DataBaseOperations{
         if (userData != null) {
           String docID = userDoc.id; // Kullanıcının docID'sini al
           String userName = userData['name'];
-          print("DocID: $docID, UserName: $userName");
+          
 
           // Her kullanıcının past_services koleksiyonundaki 'servicesList' belgesini oku
           DocumentSnapshot servicesSnapshot = await userDoc.reference

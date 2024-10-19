@@ -1,8 +1,10 @@
 
 import 'package:clean_app/services/database_operations.dart';
+import 'package:clean_app/services/notificationService/notification_service.dart';
 import 'package:clean_app/services/payment_service.dart';
-import 'package:clean_app/services/whatsapp%20service/whatsapp_service.dart';
+import 'package:clean_app/services/whatsappService/whatsapp_service.dart';
 import 'package:clean_app/view/login/login_page.dart';
+import 'package:clean_app/view/userView/home/account_page.dart';
 import 'package:clean_app/view/userView/pastServices/past_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,6 +15,8 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widget/popup.dart'; // Import the updated widget
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,6 +30,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _homeAnimationController;
   late String userName;
   List<Map<String, dynamic>> activeServices = [];
+  late String whatsappNumber;
+  final remoteConfig = FirebaseRemoteConfig.instance;
+  final notificationService = NotificationService();
 
   void initState() {
     super.initState();
@@ -41,10 +48,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _homeAnimationController.forward();
 
     PaymentService().initializeRemoteConfig();
-
+    initializeWhatsappRemoteConfig();
     // Retrieve the user's name from Hive asynchronously
     _retrieveUserName();
   }
+
+  Future<void> initializeWhatsappRemoteConfig() async {
+    try {
+      await Firebase.initializeApp();
+      final remoteConfig = FirebaseRemoteConfig.instance;
+
+      await remoteConfig.setConfigSettings(RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 10),
+        minimumFetchInterval: const Duration(hours: 1),
+      ));
+
+      await remoteConfig.fetchAndActivate();
+      
+        whatsappNumber = remoteConfig.getString('whatsappNo');
+        print('WhatsApp numarası: $whatsappNumber');
+     
+    } catch (e) {
+      print('WhatsApp numarası alınırken hata oluştu: $e');
+    }
+  }
+
 
   Future<void> _retrieveUserName() async {
     var box = Hive.box('userBox');
@@ -122,6 +150,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ListTile(
               title: Row(
                 children: [
+                  const Icon(Icons.person, color: Color(0xFFD1461E),size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Profilim',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>AccountPage()));
+              },
+            ),
+            ListTile(
+              title: Row(
+                children: [
                   const Icon(Icons.exit_to_app, color: Color(0xFFD1461E),size: 30,),
                   SizedBox(width: 10.w),
                   Text(
@@ -158,7 +205,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   SizedBox(width: 10.w),
                   Text(
-                    'İletişim',
+                    'İletişime Geç',
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       color: Colors.black,
@@ -168,7 +215,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ],
               ),
               onTap: (){
-                  WhatsappService().launchWhatsApp('');
+                  WhatsappService().launchWhatsApp(whatsappNumber);
                 },
             ),
           ],
@@ -184,25 +231,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           color: Colors.white, // Set the back button color to white
         ),
         backgroundColor: const Color(0xFFD1461E).withOpacity(0.9),
-        title: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: SizedBox(
-                width: 50.w,
-                child: CircleAvatar(
-                  backgroundColor: Colors.grey.shade300,
-                  child: Icon(
-                    CupertinoIcons.person,
-                    size: 30.w,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 25.w),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
+        title: Text(
                 "Pestvet Temizlik",
               style: GoogleFonts.inter(
                 fontSize: 22.sp,
@@ -210,9 +239,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-          ],
-        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -391,25 +417,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     ],
                                   ),
                                   actions: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        WhatsappService().launchWhatsApp('');
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10.0), // Adjust the radius as needed
-                                        child: Image.asset(
-                                          "assets/images/whatsapp.png",
-                                          height: 30,
-                                          width: 30,
-                                          fit: BoxFit.cover,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            WhatsappService().launchWhatsApp(whatsappNumber);
+                                          },
+                                          child: Row(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.circular(10.0),
+                                                child: Image.asset(
+                                                  "assets/images/whatsapp.png",
+                                                  height: 30,
+                                                  width: 30,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                "İletişime Geç",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14.sp,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text("Kapat"),
+                                        TextButton(
+                                          onPressed: () {
+                                            
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text("Kapat"),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 );

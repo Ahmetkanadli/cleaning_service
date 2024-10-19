@@ -97,6 +97,13 @@ class _PastServicesState extends State<PastServices> {
                     fontWeight: FontWeight.w400
                 ),
               ),
+              Text("Hizmet Durumu: ${service['status']}",
+                style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
             ],
           ),
           actions: [
@@ -104,7 +111,7 @@ class _PastServicesState extends State<PastServices> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Close",
+              child: Text("Kapat",
                 style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     color: Colors.black,
@@ -218,6 +225,13 @@ class _PastServicesState extends State<PastServices> {
                             ),
                           ),
                           Text("Oluşturulma tarihi: $formattedDate",
+                            style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
+                          Text("Hizmet Durumu: ${service['status']}",
                             style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 color: Colors.black,

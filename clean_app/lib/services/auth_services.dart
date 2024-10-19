@@ -4,6 +4,7 @@ import 'package:clean_app/view/login/sign_up.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -108,6 +109,12 @@ class AuthService {
               bool isAdmin = userData['isAdmin'] ?? false; // Eğer null ise false kullan
               box.put('userName', userName);
               box.put('isAdmin', isAdmin);
+
+              String docID = _user.user?.uid ?? '';
+              String? fcmToken = await FirebaseMessaging.instance.getToken();
+              await _firestore.collection('users').doc(docID).set({
+                  'fcmToken': fcmToken,
+              }, SetOptions(merge: true));
 
               print("isAdmin : ${box.get('isAdmin')}");
 

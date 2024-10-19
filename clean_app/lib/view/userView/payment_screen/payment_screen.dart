@@ -1,4 +1,6 @@
+import 'package:clean_app/services/notificationService/notification_service.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -82,6 +84,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
       await DataBaseOperations().addPastService(userId: userId, service: service);
 
       await Future.delayed(const Duration(seconds: 1));
+      // Adminlere yeni sipariş bildirimi gönder
+      NotificationService notificationService = NotificationService();
+      
+      // Admin kullanıcıları bul
+      QuerySnapshot adminSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('isAdmin', isEqualTo: true)
+          .get();
+      
+      // Her admin için bildirim gönder
+      for (var adminDoc in adminSnapshot.docs) {
+        String? adminFcmToken = adminDoc.get('fcmToken');
+        if (adminFcmToken != null) {
+          await notificationService.sendNotification(
+            to: adminDoc.id,
+            title: 'Yeni Hizmet Siparişi Geldi',
+            body: '${widget.name} adlı kullanıcı ${widget.fee}TL değerinde ${widget.cleaningPlace} hizmetini satın almıştır.',
+            fcmToken: adminFcmToken,
+          );
+        }
+      }
+      
+      print("Admin kullanıcılara yeni sipariş bildirimi gönderildi.");
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),

@@ -1,3 +1,4 @@
+import 'package:clean_app/services/notificationService/notification_service.dart';
 import 'package:clean_app/services/payment_service.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/splash/splash_screen.dart';
@@ -14,11 +15,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  final notificationService = NotificationService();
+  await notificationService.initialize();
 
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
   await Hive.openBox('userBox');
-
+  await notificationService.saveApiKey('d9645932-f3d1-4e00-bbf3-999f91afb448');
 
   runApp(const MyApp());
 }

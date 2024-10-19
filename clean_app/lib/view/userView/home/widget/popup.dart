@@ -104,7 +104,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         width: double.infinity,
         height: _pageController.hasClients && _pageController.page == 2
@@ -135,10 +135,21 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       children: [
         Positioned(
           top: 8,
+          right: 4,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              child: Icon(Icons.close),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 8,
           left: 8,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
+          child: GestureDetector(
+            onTap: () {
               if (_pageController.page!.toInt() > 0) {
                 _pageController.previousPage(
                   duration: const Duration(milliseconds: 300),
@@ -148,11 +159,14 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                 Navigator.of(context).pop();
               }
             },
+            child: Container(
+              child: Icon(Icons.arrow_back),
+            ),
           ),
         ),
         Positioned(
           top: 8,
-          right: 8,
+          right: 60,
           child: Text(
             "Min. Ücret: $_minimumFee TL",
             style: _textStyle,
@@ -257,7 +271,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
         Text("Evin Oda sayısı kaç", style: _headerTextStyle),
         const SizedBox(height: 20),
         Container(
-          height: 210.h, // Set the desired height
+          height: 235.h, // Set the desired height
           child: FutureBuilder<List<Map<String, dynamic>>>(
             future: DataBaseOperations().fetchProducts(),
             builder: (context, snapshot) {
@@ -406,31 +420,68 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             }),
             const SizedBox(height: 20),
             if (_selectedCity != null) ...[
-              const Text("İlçe seçiniz", style: TextStyle(fontSize: 20)),
+               Text("İlçe seçiniz", style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.black)),
               const SizedBox(height: 10),
-              DropdownButton<String>(
-                value: _selectedDistrict,
-                menuMaxHeight: 100.h,
-                items: (_selectedCity == "İstanbul"
-                        ? _istanbulDistricts
-                        : _kocaeliDistricts)
-                    .map((district) => DropdownMenuItem(
-                          value: district,
-                          child: Text(district),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDistrict = value;
-                  });
-                },
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Color(0xFFD1461E).withOpacity(0.5), width: 1.5),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedDistrict,
+                    icon: Icon(Icons.arrow_drop_down, color: Color(0xFFD1461E)),
+                    iconSize: 24.sp,
+                    elevation: 16,
+                    style: GoogleFonts.inter(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                    ),
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
+                    hint: Text('İlçe seçiniz', style: GoogleFonts.inter(color: Colors.grey)),
+                    items: (_selectedCity == "İstanbul"
+                            ? _istanbulDistricts
+                            : _kocaeliDistricts)
+                        .map((district) => DropdownMenuItem(
+                              value: district,
+                              child: Text(district),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDistrict = value;
+                      });
+                    },
+                    menuMaxHeight: 200.h,
+                  ),
+                ),
               ),
             ],
             const SizedBox(height: 20),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Adres",
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E).withOpacity(0.5), width: 1.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E).withOpacity(0.5), width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E), width: 2),
+                ),
+                labelStyle: GoogleFonts.inter(color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              ),
+              style: GoogleFonts.inter(
+                color: Colors.black,
+                fontSize: 16.sp,
               ),
               onChanged: (value) {
                 setState(() {
@@ -438,13 +489,32 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             TextField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Telefon",
                 hintText: "05XXXXXXXXX",
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E).withOpacity(0.5), width: 1.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E).withOpacity(0.5), width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: Color(0xFFD1461E), width: 2),
+                ),
+                labelStyle: GoogleFonts.inter(color: Colors.grey),
+                hintStyle: GoogleFonts.inter(color: Colors.grey),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               ),
+              style: GoogleFonts.inter(
+                color: Colors.black,
+                fontSize: 16.sp,
+              ),
+              maxLength: 11,
               keyboardType: TextInputType.phone,
               onChanged: (value) {
                 setState(() {
@@ -604,7 +674,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
             color: selectedValue == value
                 ? const Color(0xFFD1461E).withOpacity(0.9)
                 : Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           child: Text(
             text,
