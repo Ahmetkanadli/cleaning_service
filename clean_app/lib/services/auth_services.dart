@@ -1,4 +1,5 @@
 
+import 'package:clean_app/view/adminView/adminPanel/admin_panel.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/login/sign_up.dart';
 import 'package:clean_app/view/userView/home/home_page.dart';
@@ -122,7 +123,7 @@ class AuthService {
               if (isAdmin == true) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (BuildContext context) => const AdminView()),
+                  MaterialPageRoute(builder: (BuildContext context) => AdminPanel()),
                 );
               } else {
                 Navigator.pushReplacement(

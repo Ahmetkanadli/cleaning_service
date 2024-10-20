@@ -412,6 +412,25 @@ class _AdminViewState extends State<AdminView> {
             ListTile(
               title: Row(
                 children: [
+                  const Icon(Icons.price_change, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Fiyat Güncelleme',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PriceUpdateScreen()));
+              },
+            ),
+            ListTile(
+              title: Row(
+                children: [
                   const Icon(Icons.shopping_cart, color: Color(0xFFD1461E), size: 30,),
                   SizedBox(width: 10.w),
                   Text(
