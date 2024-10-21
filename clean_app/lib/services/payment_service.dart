@@ -47,7 +47,8 @@ class PaymentService {
     required String phone,
     required String merchantOid,
   }) async {
-    int paymentAmount = (amount * 100).toInt();
+    //int paymentAmount = (amount * 100).toInt();
+    int paymentAmount = 70000; // 700 TL
     String userBasket = base64Encode(utf8.encode(jsonEncode([
       ["Örnek ürün", amount.toString(), "1"]
     ])));

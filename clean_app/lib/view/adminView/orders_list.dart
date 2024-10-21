@@ -249,14 +249,27 @@ class _OrdersListState extends State<OrdersList> {
               child: ListTile(
                 title: Row(
                   children: [
-                    Text(service['cleaningPlace'],
-                      style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w700
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(service['cleaningPlace'],
+                          style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700
+                          ),
+                        ),
+                        Text("Sipariş No: ${service['merchantOid']}",
+                          style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
+                    /*
                     Text("Ücret: ${service['fee'].toString()}",
                       style: GoogleFonts.inter(
                           fontSize: 16.sp,
@@ -264,6 +277,7 @@ class _OrdersListState extends State<OrdersList> {
                           fontWeight: FontWeight.w400
                       ),
                     )
+                     */
                   ],
                 ),
                 subtitle: Column(
@@ -291,6 +305,13 @@ class _OrdersListState extends State<OrdersList> {
                       ),
                     ),
                     Text("Telefon: ${service['phone']}",
+                      style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400
+                      ),
+                    ),
+                    Text("Temizlik Süresi: ${service['numberOfRoomsOrArea']}",
                       style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           color: Colors.black,

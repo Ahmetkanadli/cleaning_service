@@ -152,7 +152,7 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Card(
-                      color: Color(0xFFD1461E),
+                      color: const Color(0xFFD1461E),
                       child: Container(
                         width: double.infinity,
                         height: 30.h,
@@ -205,8 +205,8 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
       child: ListTile(
         title: Text(
           product['room_count'] != null
-              ? 'Oda Sayısı ${product['room_count']}'
-              : 'Temizlik Alanı ${product['product_area']} m²',
+              ? 'Temizlik Saati ${product['room_count']}'
+              : 'Temizlik Saati ${product['product_area']}',
           style: GoogleFonts.inter(
             fontSize: 16.sp,
             fontWeight: FontWeight.w500,
@@ -305,12 +305,12 @@ class _PriceUpdateScreenState extends State<PriceUpdateScreen> {
                   if (cleaningType == 'Ev Temizliği')
                     TextField(
                       controller: roomCountController,
-                      decoration: InputDecoration(labelText: 'Oda Sayısı'),
+                      decoration: InputDecoration(labelText: 'Temizlik Süresi (saat)'),
                     ),
                   if (cleaningType == 'Ofis Temizliği')
                     TextField(
                       controller: productAreaController,
-                      decoration: InputDecoration(labelText: 'Temizlik Alanı (m²)'),
+                      decoration: InputDecoration(labelText: 'Temizlik Süresi (saat)'),
                     ),
                   TextField(
                     controller: priceController,

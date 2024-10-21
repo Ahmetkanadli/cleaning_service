@@ -185,8 +185,12 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: 30.h),
-        Text("Ofis Kaç m²", style: _headerTextStyle),
-        SizedBox(height: 20.h),
+        Text("Temizlik Süresi Seçiniz", style: _headerTextStyle),
+        Text("Minumum 4 saat, Maksimum 8 saat seçebilirsiniz",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+                fontSize: 16.sp, color: Colors.black, fontWeight: FontWeight.w400)),
+        const SizedBox(height: 20),
         Container(
           height: 210.h,
           child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -210,7 +214,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                 filteredProducts.sort((a, b) {
                   int roomCountA = int.tryParse(a['product_area'][0]) ?? 0;
                   int roomCountB = int.tryParse(b['product_area'][0]) ?? 0;
-                  return roomCountB.compareTo(roomCountA);
+                  return roomCountA.compareTo(roomCountB);
                 });
 
                 return ListView.builder(
@@ -219,7 +223,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                   itemBuilder: (context, index) {
                     Product product = Product.fromMap(filteredProducts[index]);
                     return _buildOptionButton(
-                      '${product.product_area} m²' ?? 'Unknown',
+                      '${product.product_area}' ?? 'Unknown',
                       // Provide a default value
                       product.product_area!,
                       _selectedRoom,
@@ -262,13 +266,18 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
       ],
     );
   }
-
+  // İlk olarak oda sayısı olarak tasarlanmıştı fakat revize isteği üzerine
+  // saat olarak değiştirildi.
   Widget _buildFirstPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(height: 30.h),
-        Text("Evin Oda sayısı kaç", style: _headerTextStyle),
+        Text("Temizlik Süresi Seçiniz", style: _headerTextStyle),
+        Text("Minumum 4 saat, Maksimum 8 saat seçebilirsiniz",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+                fontSize: 16.sp, color: Colors.black, fontWeight: FontWeight.w400)),
         const SizedBox(height: 20),
         Container(
           height: 235.h, // Set the desired height
@@ -582,14 +591,25 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
           Text("Telefon: $_phoneNumber", style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
           widget.pageName == "Ev Temizliği"
-              ? Text("Oda Sayısı: $_selectedRoom",
+          // Temizlik türüne göre oda sayısı veya alanı göster
+          // revize üzerine saat olarak değiştirildi
+          // önceki alan Ev Temizliği
+              ? Text("Temizlik Saati: $_selectedRoom saat",
                   style: const TextStyle(
-                      fontSize: 18)) // Display the selected room count
-              : Text("Temizlenecek Alan: $_selectedRoom",
+                      fontSize: 18))
+          // önceki alan Ofis Temizliği
+              : Text("Temizlik Saati: $_selectedRoom saat",
                   style: const TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
-          Text("Min. Ödeme Tutarı: $_minimumFee TL",
+          Text("Ödeme Tutarı: $_minimumFee TL",
               style: const TextStyle(fontSize: 18)),
+          SizedBox(height: 10.h),
+          Text("Ödeme Tutarının Sadece 700 TL'si online olarak alınacak geri kalan miktarın Elden Teslim edilmesi gerekmekte",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  color: Colors.red.shade500,
+              )),
           SizedBox(height: 10.h),
           _isLoading
               ? CircularProgressIndicator()

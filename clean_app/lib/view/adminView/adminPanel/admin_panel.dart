@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:clean_app/view/adminView/adminPanel/customer_list.dart';
 import 'package:clean_app/view/adminView/admin_view.dart';
 import 'package:clean_app/view/adminView/price_update.dart';
@@ -146,6 +148,25 @@ class _AdminPanelState extends State<AdminPanel> {
               child: Center(
                 child: Image.asset('assets/pestvet_logo.png', height: 250.h, width: 200.w,),
               ),
+            ),
+            ListTile(
+              title: Row(
+                children: [
+                  const Icon(Icons.home, color: Color(0xFFD1461E), size: 30,),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Ana Ekran',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
             ListTile(
               title: Row(

@@ -157,12 +157,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Text("Email: ${widget.email}", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text("Adres: ${widget.address}", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text("Telefon: ${widget.phone}", style: GoogleFonts.inter(fontSize: 16.sp)),
-                      Text("Ödeme: ${widget.fee} TL", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text("Hizmet Türü: ${widget.cleaningPlace}", style: GoogleFonts.inter(fontSize: 16.sp)),
                       Text(widget.cleaningPlace == 'Ev Temizliği'?
-                          "Oda Sayısı: ${widget.roomCountOrArea}" :
-                          'Temizlik Alanı: ${widget.roomCountOrArea} m²'
+                          // Revize üzerine alan değiştirildi
+                      // önceki değer oda sayısıydı
+                          "Temizlik Süresi: ${widget.roomCountOrArea}" :
+                          // önceki değer temizlik alanıydı
+                          'Temizlik Süresi: ${widget.roomCountOrArea} saat'
                           , style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Ödeme Tutarı: ${widget.fee} TL", style: GoogleFonts.inter(fontSize: 16.sp)),
+                      Text("Ödeme Tutarının Sadece 700 TL'si online olarak alınacak geri kalan miktarın Elden Teslim edilmesi gerekmekte",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            color: Colors.red.shade500,
+                          )),
                    //   Text("Temizlik Süresi: ${widget.cleaningIndex + 3} Saat", style: GoogleFonts.inter(fontSize: 16.sp)),
                     ],
                   ),

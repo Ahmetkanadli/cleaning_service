@@ -1,5 +1,6 @@
 import 'package:clean_app/services/database_operations.dart';
 import 'package:clean_app/services/whatsappService/whatsapp_service.dart';
+import 'package:clean_app/view/adminView/adminPanel/admin_panel.dart';
 import 'package:clean_app/view/adminView/price_update.dart';
 import 'package:clean_app/view/login/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -393,10 +394,10 @@ class _AdminViewState extends State<AdminView> {
             ListTile(
               title: Row(
                 children: [
-                  const Icon(Icons.price_change, color: Color(0xFFD1461E), size: 30,),
+                  const Icon(Icons.home, color: Color(0xFFD1461E), size: 30,),
                   SizedBox(width: 10.w),
                   Text(
-                    'Fiyat Güncelleme',
+                    'Ana Sayfa',
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       color: Colors.black,
@@ -406,7 +407,10 @@ class _AdminViewState extends State<AdminView> {
                 ],
               ),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PriceUpdateScreen()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => AdminPanel()),
+                );
               },
             ),
             ListTile(
