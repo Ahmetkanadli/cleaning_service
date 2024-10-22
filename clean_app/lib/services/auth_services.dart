@@ -189,8 +189,53 @@ class AuthService {
         accessToken: gAuth.accessToken,
         idToken: gAuth.idToken,
       );
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Retrieve user information
+      User? user = userCredential.user;
+      if (user != null) {
+        String docID = user.uid;
+        DocumentSnapshot userDoc = await _firestore.collection('users').doc(docID).get();
+
+        // If the user document does not exist, create it with default fields
+        if (!userDoc.exists) {
+          await _firestore.collection('users').doc(docID).set({
+            'name': user.displayName ?? 'Anonim',
+            'email': user.email,
+            'docID': docID,
+            'createdAt': FieldValue.serverTimestamp(),
+            'isAdmin': false,
+          });
+        }
+
+        // Store user information in Hive
+        var box = Hive.box('userBox');
+        box.put('userId', user.uid);
+        box.put('userEmail', user.email);
+        box.put('userName', user.displayName ?? 'Anonim');
+        box.put('isAdmin', userDoc.exists ? userDoc['isAdmin'] : false);
+
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        await _firestore.collection('users').doc(docID).set({
+          'fcmToken': fcmToken,
+        }, SetOptions(merge: true));
+
+        // Navigate based on user role
+        bool isAdmin = box.get('isAdmin');
+        if (isAdmin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => AdminPanel()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => const HomePage()),
+          );
+        }
+      }
     } catch (e) {
+      print("Google ile giriş sırasında hata oluştu: $e");
       _showErrorDialog(context, "Hata", 'Google ile giriş sırasında bir hata oluştu.', () {
         Navigator.of(context).pop();
       });

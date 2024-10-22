@@ -258,7 +258,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     OutlinedButton.icon(
                       onPressed: () {
-                        //google sign in
+                        AuthService().signInWithGoogle(context);
                       },
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
@@ -280,7 +280,10 @@ class _LoginPageState extends State<LoginPage> {
                               fontSize: 14,
                               color: const Color.fromARGB(255, 18, 18, 18))),
                     ),
-                  ])),
+                    SizedBox(height: 20.h,)
+                  ]
+                  )
+              ),
     )));
   }
 }

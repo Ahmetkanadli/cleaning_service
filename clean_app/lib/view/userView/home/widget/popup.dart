@@ -122,8 +122,8 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                   : _buildFirstPageOfis()),
             ),
             //_buildPage(_buildSecondPage()),
-            _buildPage(_buildThirdPage()),
-            _buildPage(_buildFourthPage()),
+            SingleChildScrollView(child: _buildPage(_buildThirdPage())),
+            SingleChildScrollView(child: _buildPage(_buildFourthPage())),
           ],
         ),
       ),
@@ -280,7 +280,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                 fontSize: 16.sp, color: Colors.black, fontWeight: FontWeight.w400)),
         const SizedBox(height: 20),
         Container(
-          height: 235.h, // Set the desired height
+          height: 210.h, // Set the desired height
           child: FutureBuilder<List<Map<String, dynamic>>>(
             future: DataBaseOperations().fetchProducts(),
             builder: (context, snapshot) {
