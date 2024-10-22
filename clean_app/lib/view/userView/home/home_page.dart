@@ -343,9 +343,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     fontWeight: FontWeight.w600,
                                   )),
                               Spacer(),
-                              Text("durum : ${service['status']}",
+                              Text("Durum : ${service['status']}",
                                   style: GoogleFonts.inter(
-                                    fontSize: 10.sp,
+                                    fontSize: 11.sp,
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
                                   )),

@@ -409,7 +409,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
   Widget _buildThirdPage() {
     return SingleChildScrollView(
       child: Container(
-        height: 450.h,
+        height: 500.h,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -542,6 +542,7 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
                     _selectedDistrict != null &&
                     _address.isNotEmpty &&
                     _phoneNumber.length == 11) {
+                  FocusScope.of(context).unfocus();
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeIn,
@@ -575,108 +576,119 @@ class _MultiPagePopupState extends State<MultiPagePopup> {
     String _email = box.get('userEmail', defaultValue: '');
 
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          SizedBox(height: 50.h),
-          Text("Seçtiğiniz Bilgiler", style: _headerTextStyle),
-          const SizedBox(height: 20),
-          Text("Şehir: $_selectedCity", style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text("İlçe: $_selectedDistrict",
-              style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text("Adres: $_address", style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text("Telefon: $_phoneNumber", style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          widget.pageName == "Ev Temizliği"
-          // Temizlik türüne göre oda sayısı veya alanı göster
-          // revize üzerine saat olarak değiştirildi
-          // önceki alan Ev Temizliği
-              ? Text("Temizlik Saati: $_selectedRoom saat",
-                  style: const TextStyle(
-                      fontSize: 18))
-          // önceki alan Ofis Temizliği
-              : Text("Temizlik Saati: $_selectedRoom saat",
-                  style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Text("Ödeme Tutarı: $_minimumFee TL",
-              style: const TextStyle(fontSize: 18)),
-          SizedBox(height: 10.h),
-          Text("Ödeme Tutarının Sadece 700 TL'si online olarak alınacak geri kalan miktarın Elden Teslim edilmesi gerekmekte",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  color: Colors.red.shade500,
-              )),
-          SizedBox(height: 10.h),
-          _isLoading
-              ? CircularProgressIndicator()
-              : ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Color(0xFFD1461E).withOpacity(0.9)),
-                  ),
-                  onPressed: () async {
-                    setState(() {
-                      _isLoading = true;
-                    });
+      child: Container(
+        height: 450.h,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 30.h,),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(0xFFD1461E).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text("Ödeme Tutarının Sadece 700 TL'si online olarak alınacak. Geri kalan miktarın elden hizmet veren ekip arkadaşımıza teslim edilmesi gerekmektedir",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    color: Colors.red.shade500,
+                  )),
+            ),
+            SizedBox(height: 10.h),
+            Text("Sipariş Bilgileri", style: _headerTextStyle),
+            const SizedBox(height: 20),
+            Text("Şehir: $_selectedCity", style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text("İlçe: $_selectedDistrict",
+                style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text("Adres: $_address", style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text("Telefon: $_phoneNumber", style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            widget.pageName == "Ev Temizliği"
+            // Temizlik türüne göre oda sayısı veya alanı göster
+            // revize üzerine saat olarak değiştirildi
+            // önceki alan Ev Temizliği
+                ? Text("Temizlik Saati: $_selectedRoom saat",
+                    style: const TextStyle(
+                        fontSize: 18))
+            // önceki alan Ofis Temizliği
+                : Text("Temizlik Saati: $_selectedRoom saat",
+                    style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text("Ödeme Tutarı: $_minimumFee TL",
+                style: const TextStyle(fontSize: 18)),
+            SizedBox(height: 10.h),
 
-                    try {
-                      String merchantOid =
-                          DateTime.now().millisecondsSinceEpoch.toString();
-                      String? token = await PaymentService().startPayment(
-                        amount: _minimumFee.toDouble(),
-                        email: _email,
-                        name: _name,
-                        address: _address,
-                        phone: _phoneNumber,
-                        merchantOid: merchantOid,
-                      );
+            _isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Color(0xFFD1461E).withOpacity(0.9)),
+                    ),
+                    onPressed: () async {
+                      setState(() {
+                        _isLoading = true;
+                      });
 
-                      if (token != null) {
-                        String paymentUrl =
-                            "https://www.paytr.com/odeme/guvenli/$token";
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PaymentScreen(
-                              paymentUrl: paymentUrl,
-                              name: _name,
-                              email: _email,
-                              city: _selectedCity!,
-                              district: _selectedDistrict!,
-                              address: _address,
-                              phone: _phoneNumber,
-                              fee: _minimumFee,
-                              roomCountOrArea: _selectedRoom!,
-                              //cleaningIndex: _selectedCleaningTime,
-                              cleaningPlace: widget.pageName,
+                      try {
+                        String merchantOid =
+                            DateTime.now().millisecondsSinceEpoch.toString();
+                        String? token = await PaymentService().startPayment(
+                          amount: _minimumFee.toDouble(),
+                          email: _email,
+                          name: _name,
+                          address: _address,
+                          phone: _phoneNumber,
+                          merchantOid: merchantOid,
+                        );
+
+                        if (token != null) {
+                          String paymentUrl =
+                              "https://www.paytr.com/odeme/guvenli/$token";
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaymentScreen(
+                                paymentUrl: paymentUrl,
+                                name: _name,
+                                email: _email,
+                                city: _selectedCity!,
+                                district: _selectedDistrict!,
+                                address: _address,
+                                phone: _phoneNumber,
+                                fee: _minimumFee,
+                                roomCountOrArea: _selectedRoom!,
+                                //cleaningIndex: _selectedCleaningTime,
+                                cleaningPlace: widget.pageName,
+                              ),
                             ),
-                          ),
+                          );
+                        }
+                      } catch (e) {
+                        print("hata : ${e.toString()}");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Ödeme işlemi başarısız oldu: $e')),
                         );
                       }
-                    } catch (e) {
-                      print("hata : ${e.toString()}");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('Ödeme işlemi başarısız oldu: $e')),
-                      );
-                    }
 
-                    setState(() {
-                      _isLoading = false;
-                    });
-                  },
-                  child: Text("Ödeme Sayfasına Git",
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      )),
-                ),
-        ],
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    },
+                    child: Text("Ödeme Sayfasına Git",
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        )),
+                  ),
+          ],
+        ),
       ),
     );
   }
