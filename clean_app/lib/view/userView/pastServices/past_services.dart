@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 class PastServices extends StatefulWidget {
   const PastServices({super.key});
@@ -150,104 +151,117 @@ class _PastServicesState extends State<PastServices> {
         ),
         centerTitle: true,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DataBaseOperations().getPastServices(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('An error occurred: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No past services found.'));
-          } else {
-            List<Map<String, dynamic>> pastServices = snapshot.data!;
-            return ListView.builder(
-              physics: const BouncingScrollPhysics(),
-              itemCount: pastServices.length,
-              itemBuilder: (context, index) {
-                Map<String, dynamic> service = pastServices[index];
-                DateTime timestamp = (service['timestamp'] as Timestamp).toDate();
-                String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
-                return Padding(
-                  padding: EdgeInsets.all(8.w),
-                  child: Card(
-                    elevation: 10,
-                    color: Colors.white,
-                    child: ListTile(
-                      title: Row(
-                        children: [
-                          Text(service['cleaningPlace'],
-                            style: GoogleFonts.inter(
-                                fontSize: 18.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w700
-                            ),
-                          ),
-                          const Spacer(),
-                          Text("Ücret: ${service['fee'].toString()}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          )
-                        ],
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Şehir: ${service['city']}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          Text("İlçe: ${service['district']}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          Text("Adres: ${service['address']}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          Text("Telefon: ${service['phone']}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          Text("Oluşturulma tarihi: $formattedDate",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                          Text("Hizmet Durumu: ${service['status']}",
-                            style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () => _showServiceDetails(context, service),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
+      body: LiquidPullToRefresh(
+        color: Color(0xFFD1461E),
+        animSpeedFactor: 2.0,
+        backgroundColor: Colors.white,
+        showChildOpacityTransition: false,
+        height: 80,
+        onRefresh: () async {
+          Future.delayed(Duration(milliseconds: 300), () {
+            //
+            setState(() {});
+          });
         },
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: DataBaseOperations().getPastServices(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('An error occurred: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No past services found.'));
+            } else {
+              List<Map<String, dynamic>> pastServices = snapshot.data!;
+              return ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: pastServices.length,
+                itemBuilder: (context, index) {
+                  Map<String, dynamic> service = pastServices[index];
+                  DateTime timestamp = (service['timestamp'] as Timestamp).toDate();
+                  String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+                  return Padding(
+                    padding: EdgeInsets.all(8.w),
+                    child: Card(
+                      elevation: 10,
+                      color: Colors.white,
+                      child: ListTile(
+                        title: Row(
+                          children: [
+                            Text(service['cleaningPlace'],
+                              style: GoogleFonts.inter(
+                                  fontSize: 18.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700
+                              ),
+                            ),
+                            const Spacer(),
+                            Text("Ücret: ${service['fee'].toString()}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            )
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Şehir: ${service['city']}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                            Text("İlçe: ${service['district']}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                            Text("Adres: ${service['address']}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                            Text("Telefon: ${service['phone']}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                            Text("Oluşturulma tarihi: $formattedDate",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                            Text("Hizmet Durumu: ${service['status']}",
+                              style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w400
+                              ),
+                            ),
+                          ],
+                        ),
+                        onTap: () => _showServiceDetails(context, service),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+          },
+        ),
       ),
     );
   }

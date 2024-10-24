@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AdminView extends StatefulWidget {
@@ -309,62 +310,111 @@ class _AdminViewState extends State<AdminView> {
 
   void _showSearchDialog() {
     TextEditingController searchController = TextEditingController();
+    String searchType = 'orderNumber';
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            "Müşteri Adına Göre Ara",
-            style: GoogleFonts.interTight(
-              fontSize: 18.sp,
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              hintText: "Müşteri adı girin",
-              hintStyle: GoogleFonts.inter(
-                fontSize: 16.sp,
-                color: Colors.grey,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "İptal",
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFFD1461E),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                _filterByCustomerName(searchController.text);
-                Navigator.of(context).pop();
-              },
-              child: Text(
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(
                 "Ara",
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFFD1461E),
+                style: GoogleFonts.interTight(
+                  fontSize: 18.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-          ],
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButton<String>(
+                    value: searchType,
+                    items: <String>['customerName', 'orderNumber']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value == 'customerName' ? 'Müşteri Adına Göre' : 'Sipariş Numarasına Göre',
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          searchType = newValue;
+                        });
+                      }
+                    },
+                  ),
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: searchType == 'customerName' ? "Müşteri adı girin" : "Sipariş numarası girin",
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "İptal",
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFFD1461E),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _filterServicesBySearchType(searchType, searchController.text);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "Ara",
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFFD1461E),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
+  }
+  void _filterServicesBySearchType(String searchType, String query) {
+    setState(() {
+      if (searchType == 'customerName') {
+        filteredServices = allPastServices.where((service) {
+          return service['userName'].toLowerCase().contains(query.toLowerCase());
+        }).toList();
+        selectedFilter = 'Müşteri: $query';
+      } else if (searchType == 'orderNumber') {
+        filteredServices = allPastServices.where((service) {
+          return service['merchantOid'].toString().toLowerCase().contains(query.toLowerCase());
+        }).toList();
+        selectedFilter = 'Sipariş No: $query';
+      }
+    });
   }
 
   void _filterByCustomerName(String customerName) {
@@ -499,166 +549,187 @@ class _AdminViewState extends State<AdminView> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  selectedFilter,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w400,
+      body: LiquidPullToRefresh(
+        color: Color(0xFFD1461E),
+        animSpeedFactor: 2.0,
+        backgroundColor: Colors.white,
+        showChildOpacityTransition: false,
+        height: 80,
+        onRefresh: () async {
+          Future.delayed(Duration(milliseconds: 300), () {
+            //
+            setState(() {});
+          });
+        },
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    selectedFilter,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-                DropdownButton<String>(
-                  value: filterType,
-                  icon: const Icon(Icons.filter_list, color: Colors.black),
-                  dropdownColor: const Color(0xFFD1461E),
-                  items: <String>['all', 'done', 'not_done', 'ekip_yolda', 'iptal', 'date']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        _getFilterName(value),
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      if (newValue == 'date') {
-                        _selectDate(context);
-                      } else {
-                        _filterServices(newValue);
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _dbOperations.getAllUsersPastServices(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Geçmiş hizmet bulunamadı.'));
-                } else {
-                  return ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: filteredServices.length,
-                    itemBuilder: (context, index) {
-                      Map<String, dynamic> service = filteredServices[index];
-                      DateTime timestamp = (service['timestamp'] as Timestamp).toDate();
-                      String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
-                      return Padding(
-                        padding: EdgeInsets.all(8.w),
-                        child: Card(
-                          elevation: 10,
-                          color: Colors.white,
-                          child: ListTile(
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Müşteri: ${service['userName']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  "Şehir: ${service['city']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "İlçe: ${service['district']}",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Text(
-                                      "Ücret: ${service['fee']} TL",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Adres: ${service['address']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                Text(
-                                  "Telefon: ${service['phone']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                Text(
-                                  "Tarih: $formattedDate",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                Text(
-                                  "Durum: ${service['status']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onTap: () => _showServiceDetails(context, service, index),
+                  DropdownButton<String>(
+                    value: filterType,
+                    icon: const Icon(Icons.filter_list, color: Colors.black),
+                    dropdownColor: const Color(0xFFD1461E),
+                    items: <String>['all', 'done', 'not_done', 'ekip_yolda', 'iptal', 'date']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          _getFilterName(value),
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        if (newValue == 'date') {
+                          _selectDate(context);
+                        } else {
+                          _filterServices(newValue);
+                        }
+                      }
                     },
-                  );
-                }
-              },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _dbOperations.getAllUsersPastServices(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Geçmiş hizmet bulunamadı.'));
+                  } else {
+                    return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: filteredServices.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> service = filteredServices[index];
+                        DateTime timestamp = (service['timestamp'] as Timestamp).toDate();
+                        String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+                        return Padding(
+                          padding: EdgeInsets.all(8.w),
+                          child: Card(
+                            elevation: 10,
+                            color: Colors.white,
+                            child: ListTile(
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Müşteri: ${service['userName']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Sipariş No: ${service['merchantOid']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Şehir: ${service['city']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "İlçe: ${service['district']}",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        "Ücret: ${service['fee']} TL",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Adres: ${service['address']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Telefon: ${service['phone']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Tarih: $formattedDate",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Durum: ${service['status']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onTap: () => _showServiceDetails(context, service, index),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showSearchDialog,

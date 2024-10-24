@@ -12,6 +12,7 @@ import 'package:clean_app/services/database_operations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
 class AdminPanel extends StatefulWidget {
@@ -253,363 +254,376 @@ class _AdminPanelState extends State<AdminPanel> {
         ),
         centerTitle: true,
       ),
-      body: _adminData.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          //_showOrders('Yapılmadı');
-                        },
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Container(
-                            width: 150.w,
-                            height: 210.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+      body: LiquidPullToRefresh(
+        color: Color(0xFFD1461E),
+        animSpeedFactor: 2.0,
+        backgroundColor: Colors.white,
+        showChildOpacityTransition: false,
+        height: 80,
+        onRefresh: () async {
+          Future.delayed(Duration(milliseconds: 300), () {
+            //
+            setState(() {});
+          });
+        },
+        child: _adminData.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            //_showOrders('Yapılmadı');
+                          },
+                          child: Card(
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.r),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Lottie.asset(
-                                  'assets/animations/gain.json',
-                                  height: 140.h,
-                                  width: 140.w,
-                                  repeat: false,
-                                ),
+                            child: Container(
+                              width: 150.w,
+                              height: 210.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15.r),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Lottie.asset(
+                                    'assets/animations/gain.json',
+                                    height: 140.h,
+                                    width: 140.w,
+                                    repeat: false,
+                                  ),
 
-                                Text(
-                                  "Aylık Kazanç",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
+                                  Text(
+                                    "Aylık Kazanç",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Text(
-                                  "${_adminData['monthlyRevenue']}TL",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 20.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w900,
+                                  Text(
+                                    "${_adminData['monthlyRevenue']}TL",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 20.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 15.w),
-                      GestureDetector(
-                        onTap: () {
-                          //_showOrders('Tamamlandı');
-                        },
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Container(
-                            width: 150.w,
-                            height: 210.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+                        SizedBox(width: 15.w),
+                        GestureDetector(
+                          onTap: () {
+                            //_showOrders('Tamamlandı');
+                          },
+                          child: Card(
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.r),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Lottie.asset(
-                                  'assets/animations/gain.json',
-                                  height: 140.h,
-                                  width: 140.w,
-                                  repeat: false,
-                                ),
-                                Text(
-                                  "Yıllık Kazanç",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
+                            child: Container(
+                              width: 150.w,
+                              height: 210.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15.r),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Lottie.asset(
+                                    'assets/animations/gain.json',
+                                    height: 140.h,
+                                    width: 140.w,
+                                    repeat: false,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Text(
-                                  "${_adminData['yearlyRevenue']}TL",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 20.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w900,
+                                  Text(
+                                    "Yıllık Kazanç",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                  Text(
+                                    "${_adminData['yearlyRevenue']}TL",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 20.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      //_showOrders('Tamamlandı');
-                      // müşterilerin Listesini Gösterecek
-                      _showCustomers();
-                    },
-                    child: Card(
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        height: 130.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        //_showOrders('Tamamlandı');
+                        // müşterilerin Listesini Gösterecek
+                        _showCustomers();
+                      },
+                      child: Card(
+                        elevation: 10,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.r),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Lottie.asset(
-                              'assets/animations/customer.json',
-                              height: 120.h,
-                              width: 120.w,
-                            ),
-                            Text(
-                              "Toplam Müşteri ",
-                              style: GoogleFonts.inter(
-                                fontSize: 18.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
+                        child: Container(
+                          width: double.infinity,
+                          height: 130.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15.r),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Lottie.asset(
+                                'assets/animations/customer.json',
+                                height: 120.h,
+                                width: 120.w,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              "$_customerCount",
-                              style: GoogleFonts.inter(
-                                fontSize: 22.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
+                              Text(
+                                "Toplam Müşteri ",
+                                style: GoogleFonts.inter(
+                                  fontSize: 18.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                              Text(
+                                "$_customerCount",
+                                style: GoogleFonts.inter(
+                                  fontSize: 22.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _showOrders('Yapılmadı');
-                        },
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Container(
-                            width: 150.w,
-                            height: 210.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showOrders('Yapılmadı');
+                          },
+                          child: Card(
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.r),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Lottie.asset(
-                                  'assets/animations/not_done.json',
-                                  height: 150.h,
-                                  width: 140.w,
-                                  repeat: false,
-                                ),
-                                Text(
-                                  "Yapılmayanlar",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
+                            child: Container(
+                              width: 150.w,
+                              height: 210.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15.r),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Lottie.asset(
+                                    'assets/animations/not_done.json',
+                                    height: 150.h,
+                                    width: 140.w,
+                                    repeat: false,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Text(
-                                  "${_adminData['notDoneOrders']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 22.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w900,
+                                  Text(
+                                    "Yapılmayanlar",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                  Text(
+                                    "${_adminData['notDoneOrders']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 22.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: 15.w),
-                      GestureDetector(
-                        onTap: () {
-                          _showOrders('Tamamlandı');
-                        },
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Container(
-                            width: 150.w,
-                            height: 210.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
+                        SizedBox(width: 15.w),
+                        GestureDetector(
+                          onTap: () {
+                            _showOrders('Tamamlandı');
+                          },
+                          child: Card(
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.r),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                            child: Container(
+                              width: 150.w,
+                              height: 210.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15.r),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
 
-                              children: [
-                                Lottie.asset(
-                                  'assets/animations/done.json',
-                                  height: 150.h,
-                                  width: 150.w,
-                                  repeat: false,
-                                ),
-                                Text(
-                                  "Yapılanlar",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
+                                children: [
+                                  Lottie.asset(
+                                    'assets/animations/done.json',
+                                    height: 150.h,
+                                    width: 150.w,
+                                    repeat: false,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                Text(
-                                  "${_adminData['doneOrders']}",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 22.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w900,
+                                  Text(
+                                    "Yapılanlar",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                  Text(
+                                    "${_adminData['doneOrders']}",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 22.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      _showOrders('Ekip yolda');
-                    },
-                    child: Card(
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        height: 130.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _showOrders('Ekip yolda');
+                      },
+                      child: Card(
+                        elevation: 10,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.r),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(width: 10.w),
-                            Lottie.asset(
-                              'assets/animations/on_way.json',
-                              height: 130.h,
-                              width: 130.w,
-                              repeat: false,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              "Ekip Yolda: ",
-                              style: GoogleFonts.inter(
-                                fontSize: 18.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
+                        child: Container(
+                          width: double.infinity,
+                          height: 130.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15.r),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(width: 10.w),
+                              Lottie.asset(
+                                'assets/animations/on_way.json',
+                                height: 130.h,
+                                width: 130.w,
+                                repeat: false,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              " ${_adminData['onTheWayOrders']}",
-                              style: GoogleFonts.inter(
-                                fontSize: 22.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
+                              SizedBox(width: 10.w),
+                              Text(
+                                "Ekip Yolda: ",
+                                style: GoogleFonts.inter(
+                                  fontSize: 18.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                              Text(
+                                " ${_adminData['onTheWayOrders']}",
+                                style: GoogleFonts.inter(
+                                  fontSize: 22.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=> AdminView()));
-                    },
-                    child: Card(
-                      elevation: 10,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        height: 130.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> AdminView()));
+                      },
+                      child: Card(
+                        elevation: 10,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.r),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(width: 10.w),
-                            Image.asset(
-                              'assets/images/yorganci.jpeg',
-                              height: 100.h,
-                              width: 130.w,
-                            ),
-                            SizedBox(width: 10.w),
-                            Text(
-                              "Hizmet Dökümü",
-                              style: GoogleFonts.inter(
-                                fontSize: 18.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w600,
+                        child: Container(
+                          width: double.infinity,
+                          height: 130.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15.r),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(width: 10.w),
+                              Image.asset(
+                                'assets/images/yorganci.jpeg',
+                                height: 100.h,
+                                width: 130.w,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                              SizedBox(width: 10.w),
+                              Text(
+                                "Hizmet Dökümü",
+                                style: GoogleFonts.inter(
+                                  fontSize: 18.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.h),
-            ],
+                  ],
+                ),
+                SizedBox(height: 30.h),
+              ],
+            ),
           ),
         ),
       ),

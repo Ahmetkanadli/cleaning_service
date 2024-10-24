@@ -247,28 +247,48 @@ class _OrdersListState extends State<OrdersList> {
               color: Colors.white,
               elevation: 10,
               child: ListTile(
-                title: Row(
-                  children: [
+                title:
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(service['cleaningPlace'],
-                          style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(service['userName'],
+                              style: GoogleFonts.inter(
+                                  fontSize: 18.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFD1461E).withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Text(service['cleaningPlace'],
+                                style: GoogleFonts.inter(
+                                    fontSize: 14.sp,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
+                        SizedBox(height: 5.h),
+                        //Spacer(),
+
                         Text("Sipariş No: ${service['merchantOid']}",
                           style: GoogleFonts.inter(
-                              fontSize: 18.sp,
+                              fontSize: 16.sp,
                               color: Colors.black,
                               fontWeight: FontWeight.w700
                           ),
                         ),
                       ],
                     ),
-                    const Spacer(),
                     /*
                     Text("Ücret: ${service['fee'].toString()}",
                       style: GoogleFonts.inter(
@@ -278,8 +298,7 @@ class _OrdersListState extends State<OrdersList> {
                       ),
                     )
                      */
-                  ],
-                ),
+
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
